@@ -109,10 +109,48 @@
       4. `POST /api/token/refresh/` → Refresh de token de acceso
 
 ## Fase 2: Modelado de Datos y API (Backend)
-- [ ] 2.1 Crear modelo `User` personalizado (si es necesario) y modelos `Wallet`, `Category`, `Transaction` y `SavingsGoal` según el `design.md`.
-- [ ] 2.2 Generar y aplicar migraciones en la base de datos.
-- [ ] 2.3 Desarrollar serializers y ViewSets (CRUD) para las entidades financieras (asegurando que cada usuario solo acceda a sus propios datos).
-- [ ] 2.4 Desarrollar lógica de cálculo de deuda para tarjetas de crédito (cuotas) en el endpoint de transacciones.
+- [x] 2.1 Crear modelo `User` personalizado (si es necesario) y modelos `Wallet`, `Category`, `Transaction` y `SavingsGoal` según el `design.md`.
+  - **Fecha de completado:** 19/05/2026
+  - **Implementación:**
+    - **Wallet** (`backend/apps/wallets/models.py`):
+      - Campos: `user`, `name`, `type` (cash/debit/credit), `balance`, `credit_limit`, `billing_cycle_date`
+      - Propiedad `available_credit` para tarjetas de crédito
+      - Validaciones: `MinValueValidator` para montos positivos
+    - **Category** (`backend/apps/categories/models.py`):
+      - Campos: `user`, `name`, `color_hex` (validación regex hex), `is_default`
+      - Unique together: `['user', 'name']`
+    - **Transaction** (`backend/apps/transactions/models.py`):
+      - Campos: `user`, `wallet`, `category`, `amount`, `type` (income/expense/transfer)
+      - Soporte de cuotas: `installments`, `current_installment`
+      - Propiedades: `installment_amount`, `remaining_installments`
+      - Campo `is_synced` para sincronización offline
+    - **SavingsGoal** (`backend/apps/goals/models.py`):
+      - Campos: `user`, `name`, `target_amount`, `current_amount`, `deadline`
+      - Propiedades: `progress_percentage`, `remaining_amount`
+- [x] 2.2 Generar y aplicar migraciones en la base de datos.
+  - **Fecha de completado:** 19/05/2026
+  - Migraciones generadas y aplicadas exitosamente para todas las apps
+  - Tablas creadas: `wallets`, `categories`, `transactions`, `savings_goals`
+- [x] 2.3 Desarrollar serializers y ViewSets (CRUD) para las entidades financieras (asegurando que cada usuario solo acceda a sus propios datos).
+  - **Fecha de completado:** 19/05/2026
+  - **WalletViewSet**: CRUD completo, filtrado por usuario, propiedad `available_credit`
+  - **CategoryViewSet**: CRUD completo, filtrado por usuario
+  - **TransactionViewSet**: CRUD completo con:
+    - Validación de propiedad de wallet
+    - Verificación de saldo/crédito disponible
+    - Actualización automática de balance del wallet
+    - Endpoint `summary` para resumen mensual (income, expenses, balance)
+    - Filtros por tipo, wallet, rango de fechas
+  - **SavingsGoalViewSet**: CRUD completo con:
+    - Endpoint `add_funds` para agregar fondos
+    - Endpoint `withdraw_funds` para retirar fondos
+    - Cálculo automático de progreso
+- [x] 2.4 Desarrollar lógica de cálculo de deuda para tarjetas de crédito (cuotas) en el endpoint de transacciones.
+  - **Fecha de completado:** 19/05/2026
+  - Propiedad `installment_amount`: calcula monto por cuota (`amount / installments`)
+  - Propiedad `remaining_installments`: calcula cuotas restantes
+  - Validación de crédito disponible al crear gastos con tarjeta
+  - Balance de tarjeta de crédito representa la deuda total
 
 ## Fase 3: Infraestructura y UI Core (Frontend PWA)
 - [ ] 3.1 Inicializar proyecto Expo (React Native) con soporte explícito para PWA (Web).

@@ -1,5 +1,10 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import SavingsGoalViewSet
+
+router = DefaultRouter()
+router.register(r'', SavingsGoalViewSet, basename='savingsgoal')
 
 urlpatterns = [
-    # Goal endpoints will be defined here
+    path('', include(router.urls)),
 ]
