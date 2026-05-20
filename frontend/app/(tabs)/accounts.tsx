@@ -21,8 +21,8 @@ export default function AccountsScreen() {
 
   const loadData = async () => {
     try {
-      const res = await walletService.getAll();
-      setWallets(res.data);
+      const data = await walletService.getAll();
+      setWallets(data);
     } catch (error) {
       console.error('Error loading wallets:', error);
     }

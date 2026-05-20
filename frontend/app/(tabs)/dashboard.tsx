@@ -1,26 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, RefreshControl } from 'react-native';
 import { TransactionCard } from '../../src/components';
-import { transactionService, walletService, goalService } from '../../src/services/finance';
-import { TransactionSummary, Transaction, Wallet, SavingsGoal } from '../../src/types';
+import { transactionService, walletService } from '../../src/services/finance';
+import { TransactionSummary, Transaction, Wallet } from '../../src/types';
 
 export default function DashboardScreen() {
   const [summary, setSummary] = useState<TransactionSummary | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [wallets, setWallets] = useState<Wallet[]>([]);
-  const [goals, setGoals] = useState<SavingsGoal[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   const loadData = async () => {
     try {
-      const [summaryRes, txRes, walletRes] = await Promise.all([
+      const [summaryRes, txData, walletData] = await Promise.all([
         transactionService.getSummary(),
         transactionService.getAll(),
         walletService.getAll(),
       ]);
       setSummary(summaryRes.data);
-      setTransactions(txRes.data);
-      setWallets(walletRes.data);
+      setTransactions(txData);
+      setWallets(walletData);
     } catch (error) {
       console.error('Error loading dashboard:', error);
     }

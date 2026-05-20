@@ -32,15 +32,15 @@ export default function RegisterScreen() {
 
   const loadData = async () => {
     try {
-      const [wRes, cRes] = await Promise.all([
+      const [walletsData, categoriesData] = await Promise.all([
         walletService.getAll(),
         categoryService.getAll(),
       ]);
-      setWallets(wRes.data);
-      setCategories(cRes.data);
+      setWallets(walletsData);
+      setCategories(categoriesData);
       
-      if (wRes.data.length > 0) setSelectedWallet(wRes.data[0]);
-      if (cRes.data.length > 0) setSelectedCategory(cRes.data[0]);
+      if (walletsData.length > 0) setSelectedWallet(walletsData[0]);
+      if (categoriesData.length > 0) setSelectedCategory(categoriesData[0]);
     } catch (error) {
       console.error('Error loading data:', error);
     }
