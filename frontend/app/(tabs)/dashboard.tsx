@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { TransactionCard } from '../../src/components';
 import { transactionService, walletService } from '../../src/services/finance';
@@ -108,16 +108,24 @@ export default function DashboardScreen() {
       
       {transactions.length > 0 ? (
         transactions.slice(0, 10).map((tx) => (
-          <TransactionCard
-            key={tx.id}
-            amount={tx.amount}
-            type={tx.type}
-            category={tx.category_name}
-            walletName={tx.wallet_name}
-            date={new Date(tx.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
-            description={tx.description}
-            installments={tx.installments > 1 ? { current: tx.current_installment, total: tx.installments } : undefined}
-          />
+          <View key={tx.id}>
+            <TransactionCard
+              amount={tx.amount}
+              type={tx.type}
+              category={tx.category_name}
+              walletName={tx.wallet_name}
+              date={new Date(tx.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+              description={tx.description}
+              installments={tx.installments > 1 ? { current: tx.current_installment, total: tx.installments } : undefined}
+            />
+            <View className="flex-row justify-end mb-3 -mt-2 px-4 gap-2">
+              <TouchableOpacity onPress={async () => {
+                try { await transactionService.delete(tx.id); loadData(); } catch {}
+              }} className="bg-red-500/20 px-3 py-1 rounded-lg">
+                <Text className="text-red-400 text-xs">Eliminar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         ))
       ) : (
         <View className="items-center justify-center py-12">

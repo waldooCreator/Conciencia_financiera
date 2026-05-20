@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Modal, Alert, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { FormInput, PrimaryButton } from '../../src/components';
 import { categoryService } from '../../src/services/finance';
 import { Category } from '../../src/types';
@@ -10,78 +11,96 @@ const COLORS = ['#6196aa', '#20394a', '#030706', '#c9ccc3', '#f9f5ed', '#e74c3c'
 export default function CategoriesScreen() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [showModal, setShowModal] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
+  const [editingCat, setEditingCat] = useState<Category | null>(null);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const [name, setName] = useState('');
   const [color, setColor] = useState('#6196aa');
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
+    try { setCategories(await categoryService.getAll()); } 
+    catch (e) { console.error(e); }
+  }, []);
+
+  useFocusEffect(useCallback(() => { loadData(); }, [loadData]));
+
+  const openCreate = () => { setModalMode('create'); setName(''); setColor('#6196aa'); setErrorMsg(''); };
+  const openEdit = (cat: Category) => { setModalMode('edit'); setEditingCat(cat); setName(cat.name); setColor(cat.color_hex); setErrorMsg(''); };
+
+  const handleSave = async () => {
+    if (!name.trim()) { setErrorMsg('Ingresa un nombre'); return; }
+    setLoading(true); setErrorMsg('');
     try {
-      const data = await categoryService.getAll();
-      setCategories(data);
-    } catch (error) {
-      console.error('Error loading categories:', error);
-    }
+      if (modalMode === 'create') {
+        await categoryService.create({ name: name.trim(), color_hex: color });
+      } else if (editingCat) {
+        await categoryService.update(editingCat.id, { name: name.trim(), color_hex: color });
+      }
+      setModalMode(null);
+      loadData();
+    } catch (e: any) { setErrorMsg('Error al guardar'); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => { loadData(); }, []);
-
-  const handleCreate = async () => {
-    if (!name.trim()) { Alert.alert('Error', 'Ingresa un nombre'); return; }
-    setLoading(true);
-    try {
-      await categoryService.create({ name: name.trim(), color_hex: color });
-      setName('');
-      setShowModal(false);
-      loadData();
-    } catch (error: any) {
-      Alert.alert('Error', 'No se pudo crear la categoría');
-    } finally { setLoading(false); }
+  const handleDelete = (cat: Category) => {
+    Alert.alert('Eliminar', `¿Eliminar "${cat.name}"?`, [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Eliminar', style: 'destructive', onPress: async () => {
+        try { await categoryService.delete(cat.id); loadData(); }
+        catch { setErrorMsg('No se pudo eliminar'); }
+      }},
+    ]);
   };
 
   return (
     <View className="flex-1 bg-bone">
       <ScrollView className="flex-1 p-6">
-        <View className="flex-row items-center mb-6">
-          <TouchableOpacity onPress={() => router.back()} className="mr-4">
-            <Text className="text-steel text-lg font-semibold">{'← Volver'}</Text>
-          </TouchableOpacity>
+        <View className="flex-row items-center mb-4">
+          <TouchableOpacity onPress={() => router.back()} className="mr-4"><Text className="text-steel text-lg font-semibold">{'← Volver'}</Text></TouchableOpacity>
           <Text className="text-2xl font-bold text-noir">Categorías</Text>
         </View>
 
-        <TouchableOpacity onPress={() => setShowModal(true)} className="bg-steel rounded-xl p-4 mb-4 items-center">
+        {errorMsg ? <View className="bg-red-50 border border-red-400 rounded-xl p-3 mb-3"><Text className="text-red-600 text-center">{errorMsg}</Text></View> : null}
+
+        <TouchableOpacity onPress={openCreate} className="bg-steel rounded-xl p-4 mb-4 items-center">
           <Text className="text-bone font-semibold">+ Nueva Categoría</Text>
         </TouchableOpacity>
 
         {categories.map((cat) => (
           <View key={cat.id} className="bg-denim rounded-2xl p-4 mb-3 flex-row items-center justify-between">
-            <View className="flex-row items-center">
+            <View className="flex-row items-center flex-1">
               <View className="w-4 h-4 rounded-full mr-3" style={{ backgroundColor: cat.color_hex }} />
               <Text className="text-bone text-lg">{cat.name}</Text>
+            </View>
+            <View className="flex-row gap-2">
+              <TouchableOpacity onPress={() => openEdit(cat)} className="bg-steel/30 px-3 py-1 rounded-lg">
+                <Text className="text-steel text-sm">Editar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleDelete(cat)} className="bg-red-500/20 px-3 py-1 rounded-lg">
+                <Text className="text-red-400 text-sm">Eliminar</Text>
+              </TouchableOpacity>
             </View>
           </View>
         ))}
       </ScrollView>
 
-      <Modal visible={showModal} transparent animationType="slide">
+      <Modal visible={modalMode !== null} transparent animationType="slide">
         <View className="flex-1 bg-noir/50 justify-end">
           <View className="bg-bone rounded-t-3xl p-6">
-            <Text className="text-xl font-bold text-noir mb-4">Nueva Categoría</Text>
+            <Text className="text-xl font-bold text-noir mb-4">{modalMode === 'create' ? 'Nueva' : 'Editar'} Categoría</Text>
             <FormInput label="Nombre" placeholder="Ej: Hormiga" value={name} onChangeText={setName} />
-            
             <Text className="text-noir font-medium mb-2 text-base">Color</Text>
-            <View className="flex-row flex-wrap gap-3 mb-4">
+            <View className="flex-row flex-wrap mb-4" style={{gap: 8}}>
               {COLORS.map((c) => (
                 <TouchableOpacity key={c} onPress={() => setColor(c)}
                   className={`w-10 h-10 rounded-full ${color === c ? 'border-2 border-noir' : ''}`}
-                  style={{ backgroundColor: c }}
-                />
+                  style={{ backgroundColor: c }} />
               ))}
             </View>
-
             <View className="flex-row mt-4">
-              <View className="flex-1 mr-2"><PrimaryButton title="Cancelar" onPress={() => setShowModal(false)} variant="secondary" /></View>
-              <View className="flex-1 ml-2"><PrimaryButton title="Crear" onPress={handleCreate} loading={loading} /></View>
+              <View className="flex-1 mr-2"><PrimaryButton title="Cancelar" onPress={() => setModalMode(null)} variant="secondary" /></View>
+              <View className="flex-1 ml-2"><PrimaryButton title="Guardar" onPress={handleSave} loading={loading} /></View>
             </View>
           </View>
         </View>

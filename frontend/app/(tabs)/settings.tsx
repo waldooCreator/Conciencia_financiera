@@ -52,6 +52,9 @@ export default function SettingsScreen() {
         <Pressable className="p-4 border-b border-steel/20" onPress={() => router.push('/categories')}>
           <Text className="text-bone text-base">📂 Gestionar Categorías</Text>
         </Pressable>
+        <Pressable className="p-4 border-b border-steel/20" onPress={() => router.push('/goals')}>
+          <Text className="text-bone text-base">🎯 Metas de Ahorro</Text>
+        </Pressable>
         <Pressable className="p-4">
           <Text className="text-bone text-base">⚙️ Preferencias</Text>
         </Pressable>
