@@ -2,25 +2,28 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { TransactionCard } from '../../src/components';
-import { transactionService, walletService } from '../../src/services/finance';
-import { TransactionSummary, Transaction, Wallet } from '../../src/types';
+import { transactionService, walletService, goalService } from '../../src/services/finance';
+import { TransactionSummary, Transaction, Wallet, SavingsGoal } from '../../src/types';
 
 export default function DashboardScreen() {
   const [summary, setSummary] = useState<TransactionSummary | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [wallets, setWallets] = useState<Wallet[]>([]);
+  const [goals, setGoals] = useState<SavingsGoal[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
-      const [summaryRes, txData, walletData] = await Promise.all([
+      const [summaryRes, txData, walletData, goalData] = await Promise.all([
         transactionService.getSummary(),
         transactionService.getAll(),
         walletService.getAll(),
+        goalService.getAll(),
       ]);
       setSummary(summaryRes.data);
       setTransactions(txData);
       setWallets(walletData);
+      setGoals(goalData);
     } catch (error) {
       console.error('Error loading dashboard:', error);
     }
@@ -98,6 +101,22 @@ export default function DashboardScreen() {
           <Text className="text-concrete text-sm mt-1">
             Deuda total en tarjetas de crédito
           </Text>
+        </View>
+      )}
+
+      {/* Metas de Ahorro */}
+      {goals.length > 0 && (
+        <View className="mb-4">
+          <Text className="text-xl font-bold text-noir mb-3">Metas de Ahorro</Text>
+          {goals.map((g) => (
+            <View key={g.id} className="bg-denim rounded-2xl p-4 mb-2">
+              <View className="flex-row justify-between mb-2">
+                <Text className="text-bone font-semibold">{g.name}</Text>
+                <Text className="text-steel font-bold">{g.progress_percentage.toFixed(0)}%</Text>
+              </View>
+              <View className="bg-steel/20 rounded-full h-2"><View className="bg-steel rounded-full h-2" style={{ width: `${Math.min(100, g.progress_percentage)}%` }} /></View>
+            </View>
+          ))}
         </View>
       )}
 
