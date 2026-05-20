@@ -258,5 +258,22 @@
     - Estado vacío cuando no hay transacciones
 
 ## Fase 5: Sincronización y Casos Extremos
-- [ ] 5.1 Implementar almacenamiento local (`AsyncStorage` o equivalente en web) para persistir temporalmente la creación de gastos cuando no hay conexión.
-- [ ] 5.2 Desarrollar la lógica (Service Worker / Cola de reintentos) para sincronizar las transacciones locales con el backend al recuperar red.
+- [x] 5.1 Implementar almacenamiento local (`AsyncStorage` o equivalente en web) para persistir temporalmente la creación de gastos cuando no hay conexión.
+  - **Fecha de completado:** 20/05/2026
+  - **Implementación:**
+    - `src/services/sync.ts`: Servicio de sincronización offline
+    - `queueTransaction()`: Guarda transacciones en AsyncStorage cuando no hay conexión
+    - `getQueue()`: Obtiene la cola de transacciones pendientes
+    - `isOnline()`: Verifica el estado de la red usando `@react-native-community/netinfo`
+    - Indicador visual en pantalla de registro cuando está offline
+    - Mensaje de confirmación "Guardado Offline" al registrar sin conexión
+- [x] 5.2 Desarrollar la lógica (Service Worker / Cola de reintentos) para sincronizar las transacciones locales con el backend al recuperar red.
+  - **Fecha de completado:** 20/05/2026
+  - **Implementación:**
+    - `syncPendingTransactions()`: Envía todas las transacciones pendientes al recuperar conexión
+    - Lógica de reintentos: errores 5xx se mantienen en cola, errores 4xx se descartan
+    - Contador de reintentos por transacción
+    - Sync automático al iniciar la app (en `_layout.tsx`)
+    - `getPendingCount()`: Obtiene cantidad de transacciones pendientes
+    - `clearQueue()`: Limpia la cola manualmente
+    - Dependencia `@react-native-community/netinfo` agregada al package.json

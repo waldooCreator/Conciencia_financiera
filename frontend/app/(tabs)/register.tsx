@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Alert, TouchableOpacity, Modal } from 'react-native';
 import { FormInput, PrimaryButton } from '../../src/components';
 import { walletService, categoryService, transactionService } from '../../src/services/finance';
+import { syncService } from '../../src/services/sync';
 import { Wallet, Category } from '../../src/types';
 
 export default function RegisterScreen() {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
   
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -20,7 +22,13 @@ export default function RegisterScreen() {
 
   useEffect(() => {
     loadData();
+    checkNetwork();
   }, []);
+
+  const checkNetwork = async () => {
+    const online = await syncService.isOnline();
+    setIsOnline(online);
+  };
 
   const loadData = async () => {
     try {
@@ -46,16 +54,38 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
-      await transactionService.create({
-        amount: parseFloat(amount),
-        type: 'expense',
-        description,
-        wallet: selectedWallet.id,
-        category: selectedCategory?.id,
-        installments: selectedWallet.type === 'credit' ? 1 : 1,
-      });
+      const online = await syncService.isOnline();
       
-      Alert.alert('Éxito', 'Gasto registrado correctamente');
+      if (online) {
+        // Online: send directly to API
+        await transactionService.create({
+          amount: parseFloat(amount),
+          type: 'expense',
+          description,
+          wallet: selectedWallet.id,
+          category: selectedCategory?.id,
+          installments: selectedWallet.type === 'credit' ? 1 : 1,
+        });
+        
+        Alert.alert('Éxito', 'Gasto registrado correctamente');
+      } else {
+        // Offline: queue for later sync
+        await syncService.queueTransaction({
+          amount: parseFloat(amount),
+          type: 'expense',
+          description,
+          wallet: selectedWallet.id,
+          category: selectedCategory?.id,
+          installments: 1,
+          is_synced: false,
+        });
+        
+        Alert.alert(
+          'Guardado Offline',
+          'Sin conexión. El gasto se sincronizará automáticamente cuando recuperes la conexión.'
+        );
+      }
+      
       setAmount('');
       setDescription('');
     } catch (error: any) {
@@ -68,6 +98,15 @@ export default function RegisterScreen() {
 
   return (
     <ScrollView className="flex-1 bg-bone p-6">
+      {/* Offline indicator */}
+      {!isOnline && (
+        <View className="bg-steel/20 rounded-xl p-3 mb-4">
+          <Text className="text-steel text-center font-medium">
+            📡 Modo offline - Se sincronizará al recuperar conexión
+          </Text>
+        </View>
+      )}
+
       <View className="mb-8">
         <Text className="text-3xl font-bold text-noir">
           Registrar Gasto
@@ -120,7 +159,7 @@ export default function RegisterScreen() {
 
       <View className="mt-6">
         <PrimaryButton
-          title="Guardar Gasto"
+          title={isOnline ? 'Guardar Gasto' : 'Guardar Offline'}
           onPress={handleSave}
           loading={loading}
         />
