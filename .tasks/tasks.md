@@ -219,10 +219,43 @@
       - `settings.tsx`: Perfil, categorías, preferencias, cerrar sesión
 
 ## Fase 4: Flujos de Usuario y Pantallas (Frontend)
-- [ ] 4.1 Implementar pantalla de Login/Registro estándar conectada al backend (JWT).
-- [ ] 4.2 Construir el flujo de Onboarding (OOBE) paso a paso ("estilo Apple" usando transiciones suaves y `FadeIn`).
-- [ ] 4.3 Desarrollar el *Bottom Navigation Bar* y la pantalla principal de "Registrar Gasto" (Fricción Cero).
-- [ ] 4.4 Construir la vista de Dashboard integrando los gráficos de KPIs (Progreso de ahorro, Gasto vs Mes Anterior, Proyección de Deuda).
+- [x] 4.1 Implementar pantalla de Login/Registro estándar conectada al backend (JWT).
+  - **Fecha de completado:** 20/05/2026
+  - **Implementación:**
+    - `app/auth/login.tsx`: Pantalla de login con email/password
+    - `app/auth/register.tsx`: Pantalla de registro con validación de contraseñas
+    - Conectado a `authService` para autenticación real
+    - Manejo de errores y estados de carga
+    - Redirección automática a onboarding tras registro exitoso
+    - `app/_layout.tsx`: Auth guard que verifica token y redirige a login o tabs
+- [x] 4.2 Construir el flujo de Onboarding (OOBE) paso a paso ("estilo Apple" usando transiciones suaves y `FadeIn`).
+  - **Fecha de completado:** 20/05/2026
+  - **Implementación:**
+    - `app/onboarding/index.tsx`: Flujo de 3 pasos con ScrollView horizontal
+    - Paso 1: Definir sueldo (opcional)
+    - Paso 2: Gastos fijos mensuales
+    - Paso 3: Meta de ahorro inicial
+    - Barra de progreso animada con color `steel`
+    - Diseño limpio estilo Apple con fondos `bone` y textos `noir`
+- [x] 4.3 Desarrollar el *Bottom Navigation Bar* y la pantalla principal de "Registrar Gasto" (Fricción Cero).
+  - **Fecha de completado:** 20/05/2026
+  - **Implementación:**
+    - `app/(tabs)/register.tsx`: Formulario funcional conectado a la API
+    - Fetch de wallets y categorías al cargar
+    - Selectores modales para medio de pago y categoría
+    - Validación de campos antes de enviar
+    - Envío de transacción a `/api/transactions/`
+    - Manejo de errores del backend (saldo insuficiente, etc.)
+- [x] 4.4 Construir la vista de Dashboard integrando los gráficos de KPIs (Progreso de ahorro, Gasto vs Mes Anterior, Proyección de Deuda).
+  - **Fecha de completado:** 20/05/2026
+  - **Implementación:**
+    - `app/(tabs)/dashboard.tsx`: Dashboard funcional con datos reales
+    - Fetch de resumen mensual desde `/api/transactions/summary/`
+    - Cards de Ingresos vs Gastos
+    - Cálculo de deuda total de tarjetas de crédito
+    - Lista de transacciones recientes con `TransactionCard`
+    - Pull-to-refresh para actualizar datos
+    - Estado vacío cuando no hay transacciones
 
 ## Fase 5: Sincronización y Casos Extremos
 - [ ] 5.1 Implementar almacenamiento local (`AsyncStorage` o equivalente en web) para persistir temporalmente la creación de gastos cuando no hay conexión.

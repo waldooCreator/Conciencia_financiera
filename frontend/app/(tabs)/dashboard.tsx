@@ -1,9 +1,52 @@
-import { View, Text, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, RefreshControl } from 'react-native';
 import { TransactionCard } from '../../src/components';
+import { transactionService, walletService } from '../../src/services/finance';
+import { TransactionSummary, Transaction, Wallet } from '../../src/types';
 
 export default function DashboardScreen() {
+  const [summary, setSummary] = useState<TransactionSummary | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [wallets, setWallets] = useState<Wallet[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadData = async () => {
+    try {
+      const [summaryRes, txRes, walletRes] = await Promise.all([
+        transactionService.getSummary(),
+        transactionService.getAll(),
+        walletService.getAll(),
+      ]);
+      setSummary(summaryRes.data);
+      setTransactions(txRes.data);
+      setWallets(walletRes.data);
+    } catch (error) {
+      console.error('Error loading dashboard:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  };
+
+  // Calculate total debt from credit cards
+  const totalDebt = wallets
+    .filter((w) => w.type === 'credit')
+    .reduce((sum, w) => sum + parseFloat(w.balance), 0);
+
   return (
-    <ScrollView className="flex-1 bg-bone p-6">
+    <ScrollView
+      className="flex-1 bg-bone p-6"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#20394a" />
+      }
+    >
       <View className="mb-6">
         <Text className="text-3xl font-bold text-noir">
           Dashboard
@@ -13,23 +56,23 @@ export default function DashboardScreen() {
         </Text>
       </View>
 
-      {/* Meta de Ahorro */}
-      <View className="bg-denim rounded-2xl p-4 mb-4">
-        <Text className="text-bone font-semibold mb-2">
-          Meta de Ahorro
-        </Text>
-        <View className="bg-steel/20 rounded-full h-3 mb-2">
-          <View className="bg-steel rounded-full h-3 w-1/4" />
+      {/* Resumen del Mes */}
+      {summary && (
+        <View className="flex-row justify-between mb-6">
+          <View className="bg-denim rounded-2xl p-4 flex-1 mr-2">
+            <Text className="text-concrete text-sm">Ingresos</Text>
+            <Text className="text-green-400 text-xl font-bold mt-1">
+              ${summary.total_income.toLocaleString()}
+            </Text>
+          </View>
+          <View className="bg-denim rounded-2xl p-4 flex-1 ml-2">
+            <Text className="text-concrete text-sm">Gastos</Text>
+            <Text className="text-bone text-xl font-bold mt-1">
+              ${summary.total_expenses.toLocaleString()}
+            </Text>
+          </View>
         </View>
-        <View className="flex-row justify-between">
-          <Text className="text-concrete text-sm">
-            $500,000 / $2,000,000
-          </Text>
-          <Text className="text-steel text-sm font-medium">
-            25%
-          </Text>
-        </View>
-      </View>
+      )}
 
       {/* Proyección de Deuda */}
       <View className="bg-denim rounded-2xl p-4 mb-4">
@@ -37,10 +80,10 @@ export default function DashboardScreen() {
           Proyección de Deuda
         </Text>
         <Text className="text-3xl font-bold text-bone">
-          $150,000
+          ${totalDebt.toLocaleString()}
         </Text>
         <Text className="text-concrete text-sm mt-1">
-          Cuotas a pagar este mes
+          Deuda total en tarjetas de crédito
         </Text>
       </View>
 
@@ -48,21 +91,25 @@ export default function DashboardScreen() {
       <Text className="text-xl font-bold text-noir mb-3">
         Transacciones Recientes
       </Text>
-      <TransactionCard
-        amount="150,000"
-        type="expense"
-        category="Hormiga"
-        walletName="RappiCard"
-        date="19 Mayo 2026"
-        description="Compra supermercado"
-      />
-      <TransactionCard
-        amount="2,500,000"
-        type="income"
-        category="Sueldo"
-        walletName="Cuenta Bancaria"
-        date="15 Mayo 2026"
-      />
+      
+      {transactions.length > 0 ? (
+        transactions.map((tx) => (
+          <TransactionCard
+            key={tx.id}
+            amount={tx.amount}
+            type={tx.type}
+            category={tx.category_name}
+            walletName={tx.wallet_name}
+            date={new Date(tx.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+            description={tx.description}
+            installments={tx.installments > 1 ? { current: tx.current_installment, total: tx.installments } : undefined}
+          />
+        ))
+      ) : (
+        <View className="items-center justify-center py-10">
+          <Text className="text-concrete text-lg">No hay transacciones aún</Text>
+        </View>
+      )}
     </ScrollView>
   );
 }
