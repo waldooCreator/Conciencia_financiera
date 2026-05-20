@@ -7,6 +7,11 @@ import { authService } from '../src/services/auth';
 import { syncService } from '../src/services/sync';
 import '../global.css';
 
+// Fix for NativeWind color scheme issue on web
+if (typeof window !== 'undefined' && window.document) {
+  window.document.documentElement.classList.add('light');
+}
+
 export default function RootLayout() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
