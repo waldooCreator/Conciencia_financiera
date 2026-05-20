@@ -48,7 +48,8 @@ export default function GoalsScreen() {
     if (!editingGoal) return;
     setLoading(true);
     try { await goalService.delete(editingGoal.id); setModalMode(null); loadData(); }
-    catch { setErrorMsg('No se pudo eliminar'); setLoading(false); }
+    catch { setErrorMsg('No se pudo eliminar'); }
+    finally { setLoading(false); }
   };
 
   return (

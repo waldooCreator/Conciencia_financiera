@@ -42,7 +42,8 @@ export default function CategoriesScreen() {
     if (!editingCat) return;
     setLoading(true);
     try { await categoryService.delete(editingCat.id); setModalMode(null); loadData(); }
-    catch { setErrorMsg('No se pudo eliminar'); setLoading(false); }
+    catch { setErrorMsg('No se pudo eliminar'); }
+    finally { setLoading(false); }
   };
 
   return (

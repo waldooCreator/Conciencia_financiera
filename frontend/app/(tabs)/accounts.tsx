@@ -45,7 +45,8 @@ export default function AccountsScreen() {
     if (!editingWallet) return;
     setLoading(true);
     try { await walletService.delete(editingWallet.id); setModalMode(null); loadData(); }
-    catch { setErrorMsg('No se pudo eliminar'); setLoading(false); }
+    catch { setErrorMsg('No se pudo eliminar'); }
+    finally { setLoading(false); }
   };
 
   const totalBalance = wallets.filter(w => w.type !== 'credit').reduce((s, w) => s + parseFloat(w.balance), 0);
