@@ -1,31 +1,44 @@
-# Backend Dockerfile
+# ==========================================
+# Dockerfile - Django Backend
+# Optimizado para desarrollo en WSL 2
+# ==========================================
 FROM python:3.11-slim
 
-# Set environment variables
+# Argumentos de build
+ARG DEV_MODE=false
+ENV DEV_MODE=${DEV_MODE}
+
+# Variables de entorno
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PIP_NO_CACHE_DIR=1
 
-# Set work directory
+# Directorio de trabajo
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        postgresql-client \
-        libpq-dev \
-        gcc \
-    && rm -rf /var/lib/apt/lists/*
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    postgresql-client \
+    libpq-dev \
+    gcc \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get purge -y --auto-remove \
+    && apt-get clean
 
-# Install Python dependencies
+# Instalar dependencias de Python
 COPY requirements.txt .
-RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
-# Copy project
+# Copiar el proyecto
 COPY . .
 
-# Expose port
+# Hacer ejecutable el entrypoint
+RUN chmod +x /app/entrypoint.sh
+
+# Puerto de exposición
 EXPOSE 8000
 
-# Default command
+# Comando por defecto (sobrescrito en docker-compose)
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

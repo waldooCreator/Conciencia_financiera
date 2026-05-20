@@ -30,7 +30,34 @@
       - PostgreSQL como base de datos
       - Modelo de usuario personalizado (`AUTH_USER_MODEL = 'users.User'`)
       - Zona horaria `America/Bogota` y lenguaje `es-es`
-- [ ] 1.2 Configurar `docker-compose.yml` para levantar PostgreSQL y aislar el entorno (asegurar mapeo correcto de volúmenes y puertos, optimizado para entornos de desarrollo fluidos, incluyendo integración sin fallos de red en WSL 2).
+- [x] 1.2 Configurar `docker-compose.yml` para levantar PostgreSQL y aislar el entorno (asegurar mapeo correcto de volúmenes y puertos, optimizado para entornos de desarrollo fluidos, incluyendo integración sin fallos de red en WSL 2).
+  - **Fecha de completado:** 19/05/2026
+  - **Implementación:**
+    - `docker-compose.yml` optimizado para WSL 2 con:
+      - Volúmenes nombrados para PostgreSQL, Redis y archivos estáticos
+      - Healthchecks para todos los servicios (db, backend, redis)
+      - Límites de recursos para PostgreSQL (512MB RAM)
+      - Opción `restart: unless-stopped` para todos los servicios
+      - Mapeo de puertos configurables mediante variables de entorno
+      - Volumen `:cached` para el backend (mejora rendimiento en WSL 2)
+      - Red personalizada `finanzas_network`
+    - `backend/entrypoint.sh` creado con:
+      - Espera activa hasta que PostgreSQL esté disponible
+      - Ejecución automática de migraciones
+      - Creación automática de superusuario en desarrollo
+      - Recolección de estáticos en producción
+    - `backend/Dockerfile` optimizado:
+      - Imagen base `python:3.11-slim`
+      - Instalación de dependencias del sistema necesarias
+      - Soporte para modo desarrollo/producción
+    - `backend/.dockerignore` para excluir archivos innecesarios del build
+    - `infrastructure/db/init.sql` para inicialización de PostgreSQL:
+      - Extensiones `uuid-ossp` y `pg_trgm`
+    - `Makefile` con comandos útiles:
+      - `make up`, `make down`, `make build`, `make migrate`
+      - `make shell`, `make logs`, `make clean`, `make test`
+    - `backend/apps/health/` con endpoint de health check (`/api/health/`)
+    - `.env.development` con variables de entorno para desarrollo local
 - [ ] 1.3 Inicializar proyecto Django y configurar conexión a la base de datos PostgreSQL dentro de Docker.
 - [ ] 1.4 Instalar y configurar Django REST Framework (DRF) y JWT para autenticación.
 
