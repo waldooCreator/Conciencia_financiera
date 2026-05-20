@@ -20,9 +20,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Response interceptor to handle token refresh
@@ -31,13 +29,18 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Don't try to refresh on login/register endpoints
+    const isAuthEndpoint = originalRequest.url?.includes('/token/') ||
+      originalRequest.url?.includes('/users/register/');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       originalRequest._retry = true;
 
       try {
         const refreshToken = await AsyncStorage.getItem('refreshToken');
         if (!refreshToken) {
-          throw new Error('No refresh token');
+          // No refresh token - reject with original error
+          return Promise.reject(error);
         }
 
         const response = await axios.post(`${API_URL}/token/refresh/`, {
@@ -49,11 +52,11 @@ api.interceptors.response.use(
 
         originalRequest.headers.Authorization = `Bearer ${access}`;
         return api(originalRequest);
-      } catch (refreshError) {
-        // Clear tokens and redirect to login
+      } catch (_refreshError) {
+        // Refresh failed - clear tokens but reject with ORIGINAL error
         await AsyncStorage.removeItem('accessToken');
         await AsyncStorage.removeItem('refreshToken');
-        return Promise.reject(refreshError);
+        return Promise.reject(error);
       }
     }
 
