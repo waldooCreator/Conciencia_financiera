@@ -57,13 +57,13 @@ export default function RegisterScreen() {
     <View className="flex-1 bg-bone" style={{ paddingTop: insets.top }}>
       <ScrollView
         className="flex-1"
-        contentContainerClassName="px-8"
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerClassName="px-8 flex-1 justify-center"
+        contentContainerStyle={{ paddingBottom: 40, paddingTop: 40 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         {/* Title */}
-        <View className="pt-12 pb-10 items-center">
+        <View className="items-center mb-12">
           <Text className="text-2xl font-semibold text-noir tracking-tight">Nuevo Gasto</Text>
         </View>
 
@@ -163,9 +163,6 @@ export default function RegisterScreen() {
             {loading ? 'Guardando...' : 'Guardar Gasto'}
           </Text>
         </TouchableOpacity>
-
-        {/* Spacer */}
-        <View className="h-10" />
       </ScrollView>
 
       {/* Wallet Picker */}
