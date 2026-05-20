@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { FormInput, PrimaryButton } from '../../src/components';
 import { authService } from '../../src/services/auth';
@@ -10,34 +10,37 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleRegister = async () => {
+    setErrorMsg('');
     if (!email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Por favor completa todos los campos');
+      setErrorMsg('Completa todos los campos');
       return;
     }
-
+    if (password.length < 8) {
+      setErrorMsg('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
+      setErrorMsg('Las contraseñas no coinciden');
       return;
     }
 
     setLoading(true);
     try {
       await authService.register(email, password, confirmPassword);
-      Alert.alert('Éxito', 'Cuenta creada exitosamente.', [
-        { text: 'OK', onPress: () => router.replace('/onboarding') }
-      ]);
+      setErrorMsg('');
+      router.replace('/onboarding');
     } catch (error: any) {
       const data = error.response?.data;
-      let message = 'Error al crear la cuenta';
       if (data) {
-        // DRF returns field errors as objects/arrays
         const firstKey = Object.keys(data)[0];
         const fieldError = data[firstKey];
-        message = Array.isArray(fieldError) ? fieldError[0] : String(fieldError || message);
+        setErrorMsg(Array.isArray(fieldError) ? fieldError[0] : String(fieldError));
+      } else {
+        setErrorMsg('Error de conexión. ¿Está corriendo el backend?');
       }
-      Alert.alert('Error', message);
     } finally {
       setLoading(false);
     }
@@ -82,6 +85,12 @@ export default function RegisterScreen() {
           onChangeText={setConfirmPassword}
           secureTextEntry
         />
+
+        {errorMsg ? (
+          <View className="bg-red-50 border border-red-400 rounded-xl p-3 mb-4">
+            <Text className="text-red-600 text-center">{errorMsg}</Text>
+          </View>
+        ) : null}
 
         <View className="mt-6">
           <PrimaryButton

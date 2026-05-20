@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { FormInput, PrimaryButton } from '../../src/components';
 import { authService } from '../../src/services/auth';
@@ -9,10 +9,12 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleLogin = async () => {
+    setErrorMsg('');
     if (!email || !password) {
-      Alert.alert('Error', 'Por favor completa todos los campos');
+      setErrorMsg('Completa todos los campos');
       return;
     }
 
@@ -21,8 +23,8 @@ export default function LoginScreen() {
       await authService.login(email, password);
       router.replace('/dashboard');
     } catch (error: any) {
-      const message = error.response?.data?.detail || 'Error al iniciar sesión. Verifica tus credenciales.';
-      Alert.alert('Error de autenticación', message);
+      const detail = error.response?.data?.detail;
+      setErrorMsg(detail || 'Error de conexión. ¿Está corriendo el backend?');
     } finally {
       setLoading(false);
     }
@@ -63,6 +65,12 @@ export default function LoginScreen() {
           onChangeText={setPassword}
           secureTextEntry
         />
+
+        {errorMsg ? (
+          <View className="bg-red-50 border border-red-400 rounded-xl p-3 mb-4">
+            <Text className="text-red-600 text-center">{errorMsg}</Text>
+          </View>
+        ) : null}
 
         <View className="mt-6">
           <PrimaryButton
