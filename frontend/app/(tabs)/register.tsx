@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, Alert, TouchableOpacity, Modal } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { FormInput, PrimaryButton } from '../../src/components';
 import { walletService, categoryService, transactionService } from '../../src/services/finance';
 import { syncService } from '../../src/services/sync';
@@ -20,17 +21,7 @@ export default function RegisterScreen() {
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
-  useEffect(() => {
-    loadData();
-    checkNetwork();
-  }, []);
-
-  const checkNetwork = async () => {
-    const online = await syncService.isOnline();
-    setIsOnline(online);
-  };
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [walletsData, categoriesData] = await Promise.all([
         walletService.getAll(),
@@ -38,12 +29,21 @@ export default function RegisterScreen() {
       ]);
       setWallets(walletsData);
       setCategories(categoriesData);
-      
-      if (walletsData.length > 0) setSelectedWallet(walletsData[0]);
-      if (categoriesData.length > 0) setSelectedCategory(categoriesData[0]);
+      if (!selectedWallet && walletsData.length > 0) setSelectedWallet(walletsData[0]);
+      if (!selectedCategory && categoriesData.length > 0) setSelectedCategory(categoriesData[0]);
     } catch (error) {
       console.error('Error loading data:', error);
     }
+  }, []);
+
+  // Refresh data when tab is focused
+  useFocusEffect(useCallback(() => { loadData(); }, [loadData]));
+
+  useEffect(() => { checkNetwork(); }, []);
+
+  const checkNetwork = async () => {
+    const online = await syncService.isOnline();
+    setIsOnline(online);
   };
 
   const handleSave = async () => {

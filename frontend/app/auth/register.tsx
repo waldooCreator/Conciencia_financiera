@@ -29,8 +29,15 @@ export default function RegisterScreen() {
         { text: 'OK', onPress: () => router.replace('/onboarding') }
       ]);
     } catch (error: any) {
-      const message = error.response?.data?.detail || error.response?.data?.password || 'Error al crear la cuenta';
-      Alert.alert('Error', typeof message === 'string' ? message : JSON.stringify(message));
+      const data = error.response?.data;
+      let message = 'Error al crear la cuenta';
+      if (data) {
+        // DRF returns field errors as objects/arrays
+        const firstKey = Object.keys(data)[0];
+        const fieldError = data[firstKey];
+        message = Array.isArray(fieldError) ? fieldError[0] : String(fieldError || message);
+      }
+      Alert.alert('Error', message);
     } finally {
       setLoading(false);
     }

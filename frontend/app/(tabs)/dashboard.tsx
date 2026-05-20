@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, RefreshControl } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { TransactionCard } from '../../src/components';
 import { transactionService, walletService } from '../../src/services/finance';
 import { TransactionSummary, Transaction, Wallet } from '../../src/types';
@@ -10,7 +11,7 @@ export default function DashboardScreen() {
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [summaryRes, txData, walletData] = await Promise.all([
         transactionService.getSummary(),
@@ -23,11 +24,9 @@ export default function DashboardScreen() {
     } catch (error) {
       console.error('Error loading dashboard:', error);
     }
-  };
-
-  useEffect(() => {
-    loadData();
   }, []);
+
+  useFocusEffect(useCallback(() => { loadData(); }, [loadData]));
 
   const onRefresh = async () => {
     setRefreshing(true);
