@@ -68,10 +68,10 @@ export default function RegisterScreen() {
           <Text className="text-2xl font-semibold text-noir tracking-tight">Nuevo Gasto</Text>
         </View>
 
-        {/* Amount - Section 1: SlideInLeft + FadeIn, delay 100ms */}
+        {/* Amount - Section 1 */}
         <Animated.View
-          entering={FadeInLeft.springify().damping(15).delay(100)}
-          className="mb-8"
+          entering={FadeInLeft.springify().damping(8).mass(0.3).delay(100)}
+          className="mb-10"
         >
           <Text className="text-xs font-medium text-steel mb-2 ml-1 uppercase tracking-wider">Monto</Text>
           <TextInput
@@ -92,10 +92,10 @@ export default function RegisterScreen() {
           />
         </Animated.View>
 
-        {/* Description - Section 2: SlideInRight + FadeIn, delay 200ms */}
+        {/* Description - Section 2 */}
         <Animated.View
-          entering={FadeInRight.springify().damping(15).delay(200)}
-          className="mb-8"
+          entering={FadeInRight.springify().damping(8).mass(0.3).delay(200)}
+          className="mb-10"
         >
           <Text className="text-xs font-medium text-steel mb-2 ml-1 uppercase tracking-wider">Descripción</Text>
           <TextInput
@@ -108,9 +108,9 @@ export default function RegisterScreen() {
         </Animated.View>
 
         {/* Selection Cards */}
-        <Animated.View className="mb-8" style={{ gap: 12 }}>
-          {/* Wallet - Section 3: SlideInLeft + FadeIn, delay 300ms */}
-          <Animated.View entering={FadeInLeft.springify().damping(15).delay(300)}>
+        <View className="mb-10" style={{ gap: 14 }}>
+          {/* Wallet - Section 3 */}
+          <Animated.View entering={FadeInLeft.springify().damping(8).mass(0.3).delay(300)}>
           <TouchableOpacity
             onPress={() => setShowWalletModal(true)}
             activeOpacity={0.8}
@@ -135,8 +135,8 @@ export default function RegisterScreen() {
           </TouchableOpacity>
           </Animated.View>
 
-          {/* Category - Section 4: SlideInRight + FadeIn, delay 400ms */}
-          <Animated.View entering={FadeInRight.springify().damping(15).delay(400)}>
+          {/* Category - Section 4 */}
+          <Animated.View entering={FadeInRight.springify().damping(8).mass(0.3).delay(400)}>
           <TouchableOpacity
             onPress={() => setShowCategoryModal(true)}
             activeOpacity={0.8}
@@ -154,7 +154,7 @@ export default function RegisterScreen() {
             <Text className="text-concrete text-lg">›</Text>
           </TouchableOpacity>
           </Animated.View>
-        </Animated.View>
+        </View>
 
         {/* Error */}
         {errorMsg ? (
@@ -163,8 +163,8 @@ export default function RegisterScreen() {
           </View>
         ) : null}
 
-        {/* Save Button - Section 5: SlideInLeft + FadeIn, delay 500ms */}
-        <Animated.View entering={FadeInLeft.springify().damping(15).delay(500)}>
+        {/* Save Button - Section 5 */}
+        <Animated.View entering={FadeInLeft.springify().damping(8).mass(0.3).delay(500)}>
         <TouchableOpacity
           onPress={handleSave}
           disabled={loading}
