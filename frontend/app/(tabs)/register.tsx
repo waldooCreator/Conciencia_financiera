@@ -75,26 +75,37 @@ export default function RegisterScreen() {
           <Text className="text-2xl font-semibold text-noir tracking-tight">Nuevo Gasto</Text>
         </View>
 
-        {/* Amount */}
-        <View className="items-center mb-8">
-          <TouchableOpacity
-            onPress={() => amountRef.current?.focus()}
-            activeOpacity={0.7}
-            className="items-center"
-          >
-            <Text className="text-5xl font-semibold text-noir tracking-tighter" style={{ fontVariant: ['tabular-nums'] }}>
-              ${amount ? Number(amount).toLocaleString('es-CO') : '0'}
+        {/* Amount - Prominent Card */}
+        <View className="bg-bone border-2 border-steel rounded-3xl px-6 py-5 mb-8 mx-2">
+          <Text className="text-xs font-medium text-steel mb-3 ml-1 uppercase tracking-wider">Monto del gasto</Text>
+          <View className="flex-row items-end">
+            <Text className="text-4xl font-bold text-steel mr-2 mb-1">$</Text>
+            <TextInput
+              ref={amountRef}
+              className="flex-1 text-5xl font-semibold text-noir"
+              value={amount}
+              onChangeText={(t) => {
+                // Only allow numbers and decimal point
+                const cleaned = t.replace(/[^0-9.]/g, '');
+                // Prevent multiple dots
+                const parts = cleaned.split('.');
+                if (parts.length > 2) return;
+                // Max 2 decimal places
+                if (parts[1] && parts[1].length > 2) return;
+                setAmount(cleaned);
+              }}
+              keyboardType="decimal-pad"
+              placeholder="0"
+              placeholderTextColor="#c9ccc3"
+              maxLength={12}
+            />
+          </View>
+          {amount ? (
+            <Text className="text-concrete text-sm mt-2 ml-1">
+              {Number(amount).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 2 })}
             </Text>
-          </TouchableOpacity>
-          <TextInput
-            ref={amountRef}
-            className="absolute opacity-0 w-0 h-0"
-            value={amount}
-            onChangeText={setAmount}
-            keyboardType="decimal-pad"
-          />
-          {!amount && (
-            <Text className="text-concrete text-sm mt-2">Ingresa el monto del gasto</Text>
+          ) : (
+            <Text className="text-concrete text-sm mt-2 ml-1">Escribe el valor del gasto</Text>
           )}
         </View>
 
