@@ -31,8 +31,9 @@ export const authService = {
     const payload: any = { email, password, password_confirm };
     if (first_name) payload.first_name = first_name;
     if (last_name) payload.last_name = last_name;
-    const response = await api.post('/users/register/', payload);
-    return response.data;
+    await api.post('/users/register/', payload);
+    // Auto-login after registration to get tokens
+    return this.login(email, password);
   },
 
   async logout(): Promise<void> {

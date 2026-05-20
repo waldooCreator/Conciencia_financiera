@@ -176,7 +176,7 @@ export default function OnboardingScreen() {
                 <PrimaryButton title="Sí" onPress={() => { setHasCredit(true); animateNext(7); }} />
               </View>
               <View className="flex-1">
-                <PrimaryButton title="No" onPress={() => { setHasCredit(false); animateNext(9); }} variant="secondary" />
+                <PrimaryButton title="No" onPress={() => { setHasCredit(false); animateNext(10); }} variant="secondary" />
               </View>
             </View>
           </>
@@ -211,8 +211,27 @@ export default function OnboardingScreen() {
           </>
         );
 
-      // 9: Goal
+      // 9: Add another credit?
       case 9:
+        return (
+          <>
+            <Text className="text-3xl font-bold text-noir mb-2">¿Agregar otra tarjeta de crédito?</Text>
+            <Text className="text-concrete text-lg mb-8">
+              {creditCards.length > 0 ? `Ya tienes ${creditCards.length}: ${creditCards.map(c => c.name).join(', ')}` : ''}
+            </Text>
+            <View className="flex-row" style={{gap: 12}}>
+              <View className="flex-1">
+                <PrimaryButton title="Sí, otra" onPress={() => { setTempCreditName(''); animateNext(7); }} />
+              </View>
+              <View className="flex-1">
+                <PrimaryButton title="No, siguiente" onPress={() => animateNext(10)} variant="secondary" />
+              </View>
+            </View>
+          </>
+        );
+
+      // 10: Goal
+      case 10:
         return (
           <>
             <Text className="text-3xl font-bold text-noir mb-2">¿Cuál es tu meta de ahorro?</Text>
@@ -237,7 +256,7 @@ export default function OnboardingScreen() {
     }
   };
 
-  const computedSteps = 2 + (hasDebit ? 4 : 0) + (hasCredit ? 3 : 0) + 1;
+  const computedSteps = 2 + (hasDebit ? 4 : 0) + (hasCredit ? 4 : 0) + 1;
   const currentStepNumber = step + 1;
 
   return (
