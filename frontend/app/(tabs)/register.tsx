@@ -58,7 +58,7 @@ export default function RegisterScreen() {
     <View className="flex-1 bg-bone" style={{ paddingTop: insets.top }}>
       <ScrollView
         className="flex-1"
-        contentContainerClassName="px-8"
+        contentContainerClassName="px-10"
         contentContainerStyle={{ paddingTop: 60, paddingBottom: 60 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -68,11 +68,12 @@ export default function RegisterScreen() {
           <Text className="text-2xl font-semibold text-noir tracking-tight">Nuevo Gasto</Text>
         </View>
 
-        {/* Amount - Section 1 */}
-        <Animated.View
-          entering={FadeInLeft.springify().damping(8).mass(0.3).delay(100)}
-          className="mb-16"
-        >
+        {/* Form Container - uniform vertical rhythm */}
+        <View className="gap-y-8">
+          {/* Amount - Section 1 */}
+          <Animated.View
+            entering={FadeInLeft.springify().damping(8).mass(0.3).delay(100)}
+          >
           <Text className="text-xs font-medium text-steel mb-2 ml-1 uppercase tracking-wider">Monto</Text>
           <TextInput
             ref={amountRef}
@@ -95,7 +96,6 @@ export default function RegisterScreen() {
         {/* Description - Section 2 */}
         <Animated.View
           entering={FadeInRight.springify().damping(8).mass(0.3).delay(200)}
-          className="mb-16"
         >
           <Text className="text-xs font-medium text-steel mb-2 ml-1 uppercase tracking-wider">Descripción</Text>
           <TextInput
@@ -108,7 +108,7 @@ export default function RegisterScreen() {
         </Animated.View>
 
         {/* Selection Cards */}
-        <View className="mb-16" style={{ gap: 16 }}>
+        <View className="gap-y-6">
           {/* Wallet - Section 3 */}
           <Animated.View entering={FadeInLeft.springify().damping(8).mass(0.3).delay(300)}>
           <TouchableOpacity
@@ -176,6 +176,7 @@ export default function RegisterScreen() {
           </Text>
         </TouchableOpacity>
         </Animated.View>
+        </View>{/* End gap-y-8 */}
       </ScrollView>
 
       {/* Wallet Picker */}
