@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
+import Animated, { FadeInLeft, FadeInRight } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { walletService, categoryService, transactionService } from '../../src/services/finance';
@@ -67,8 +68,11 @@ export default function RegisterScreen() {
           <Text className="text-2xl font-semibold text-noir tracking-tight">Nuevo Gasto</Text>
         </View>
 
-        {/* Amount */}
-        <View className="mb-8">
+        {/* Amount - Section 1: SlideInLeft + FadeIn, delay 100ms */}
+        <Animated.View
+          entering={FadeInLeft.springify().damping(15).delay(100)}
+          className="mb-8"
+        >
           <Text className="text-xs font-medium text-steel mb-2 ml-1 uppercase tracking-wider">Monto</Text>
           <TextInput
             ref={amountRef}
@@ -86,10 +90,13 @@ export default function RegisterScreen() {
             placeholderTextColor="#c9ccc3"
             maxLength={12}
           />
-        </View>
+        </Animated.View>
 
-        {/* Description */}
-        <View className="mb-8">
+        {/* Description - Section 2: SlideInRight + FadeIn, delay 200ms */}
+        <Animated.View
+          entering={FadeInRight.springify().damping(15).delay(200)}
+          className="mb-8"
+        >
           <Text className="text-xs font-medium text-steel mb-2 ml-1 uppercase tracking-wider">Descripción</Text>
           <TextInput
             className="bg-bone border border-concrete rounded-xl px-4 py-3.5 text-noir text-base"
@@ -98,11 +105,12 @@ export default function RegisterScreen() {
             value={description}
             onChangeText={setDescription}
           />
-        </View>
+        </Animated.View>
 
         {/* Selection Cards */}
-        <View className="mb-8" style={{ gap: 12 }}>
-          {/* Wallet */}
+        <Animated.View className="mb-8" style={{ gap: 12 }}>
+          {/* Wallet - Section 3: SlideInLeft + FadeIn, delay 300ms */}
+          <Animated.View entering={FadeInLeft.springify().damping(15).delay(300)}>
           <TouchableOpacity
             onPress={() => setShowWalletModal(true)}
             activeOpacity={0.8}
@@ -125,8 +133,10 @@ export default function RegisterScreen() {
             </View>
             <Text className="text-concrete text-lg">›</Text>
           </TouchableOpacity>
+          </Animated.View>
 
-          {/* Category */}
+          {/* Category - Section 4: SlideInRight + FadeIn, delay 400ms */}
+          <Animated.View entering={FadeInRight.springify().damping(15).delay(400)}>
           <TouchableOpacity
             onPress={() => setShowCategoryModal(true)}
             activeOpacity={0.8}
@@ -143,7 +153,8 @@ export default function RegisterScreen() {
             </View>
             <Text className="text-concrete text-lg">›</Text>
           </TouchableOpacity>
-        </View>
+          </Animated.View>
+        </Animated.View>
 
         {/* Error */}
         {errorMsg ? (
@@ -152,7 +163,8 @@ export default function RegisterScreen() {
           </View>
         ) : null}
 
-        {/* Save Button */}
+        {/* Save Button - Section 5: SlideInLeft + FadeIn, delay 500ms */}
+        <Animated.View entering={FadeInLeft.springify().damping(15).delay(500)}>
         <TouchableOpacity
           onPress={handleSave}
           disabled={loading}
@@ -163,6 +175,7 @@ export default function RegisterScreen() {
             {loading ? 'Guardando...' : 'Guardar Gasto'}
           </Text>
         </TouchableOpacity>
+        </Animated.View>
       </ScrollView>
 
       {/* Wallet Picker */}
