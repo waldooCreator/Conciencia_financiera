@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, Animated, TextInput } from 'react-native';
+import React, { useState, useCallback, useRef } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { walletService, categoryService, transactionService } from '../../src/services/finance';
@@ -20,13 +20,6 @@ export default function RegisterScreen() {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const amountRef = useRef<TextInput>(null);
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  const animateIn = () => {
-    fadeAnim.setValue(0);
-    Animated.timing(fadeAnim, { toValue: 1, duration: 350, useNativeDriver: true }).start();
-  };
-
   const loadData = useCallback(async () => {
     try {
       const [wd, cd] = await Promise.all([walletService.getAll(), categoryService.getAll()]);
@@ -38,7 +31,6 @@ export default function RegisterScreen() {
 
   useFocusEffect(useCallback(() => {
     loadData();
-    animateIn();
     setTimeout(() => amountRef.current?.focus(), 200);
   }, []));
 
@@ -75,38 +67,25 @@ export default function RegisterScreen() {
           <Text className="text-2xl font-semibold text-noir tracking-tight">Nuevo Gasto</Text>
         </View>
 
-        {/* Amount - Prominent Card */}
-        <View className="bg-bone border-2 border-steel rounded-3xl px-6 py-5 mb-8 mx-2">
-          <Text className="text-xs font-medium text-steel mb-3 ml-1 uppercase tracking-wider">Monto del gasto</Text>
-          <View className="flex-row items-end">
-            <Text className="text-4xl font-bold text-steel mr-2 mb-1">$</Text>
-            <TextInput
-              ref={amountRef}
-              className="flex-1 text-5xl font-semibold text-noir"
-              value={amount}
-              onChangeText={(t) => {
-                // Only allow numbers and decimal point
-                const cleaned = t.replace(/[^0-9.]/g, '');
-                // Prevent multiple dots
-                const parts = cleaned.split('.');
-                if (parts.length > 2) return;
-                // Max 2 decimal places
-                if (parts[1] && parts[1].length > 2) return;
-                setAmount(cleaned);
-              }}
-              keyboardType="decimal-pad"
-              placeholder="0"
-              placeholderTextColor="#c9ccc3"
-              maxLength={12}
-            />
-          </View>
-          {amount ? (
-            <Text className="text-concrete text-sm mt-2 ml-1">
-              {Number(amount).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-            </Text>
-          ) : (
-            <Text className="text-concrete text-sm mt-2 ml-1">Escribe el valor del gasto</Text>
-          )}
+        {/* Amount */}
+        <View className="mb-8">
+          <Text className="text-xs font-medium text-steel mb-2 ml-1 uppercase tracking-wider">Monto</Text>
+          <TextInput
+            ref={amountRef}
+            className="bg-bone border border-concrete rounded-xl px-4 py-3.5 text-noir text-base"
+            value={amount}
+            onChangeText={(t) => {
+              const cleaned = t.replace(/[^0-9.]/g, '');
+              const parts = cleaned.split('.');
+              if (parts.length > 2) return;
+              if (parts[1] && parts[1].length > 2) return;
+              setAmount(cleaned);
+            }}
+            keyboardType="decimal-pad"
+            placeholder="$ 0.00"
+            placeholderTextColor="#c9ccc3"
+            maxLength={12}
+          />
         </View>
 
         {/* Description */}
