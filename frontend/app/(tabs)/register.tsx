@@ -58,20 +58,20 @@ export default function RegisterScreen() {
     <View className="flex-1 bg-bone" style={{ paddingTop: insets.top }}>
       <ScrollView
         className="flex-1"
-        contentContainerClassName="px-8 flex-1 justify-center"
-        contentContainerStyle={{ paddingBottom: 40, paddingTop: 40 }}
+        contentContainerClassName="px-8"
+        contentContainerStyle={{ paddingTop: 60, paddingBottom: 60 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         {/* Title */}
-        <View className="items-center mb-12">
+        <View className="items-center mb-16">
           <Text className="text-2xl font-semibold text-noir tracking-tight">Nuevo Gasto</Text>
         </View>
 
         {/* Amount - Section 1 */}
         <Animated.View
           entering={FadeInLeft.springify().damping(8).mass(0.3).delay(100)}
-          className="mb-10"
+          className="mb-16"
         >
           <Text className="text-xs font-medium text-steel mb-2 ml-1 uppercase tracking-wider">Monto</Text>
           <TextInput
@@ -95,7 +95,7 @@ export default function RegisterScreen() {
         {/* Description - Section 2 */}
         <Animated.View
           entering={FadeInRight.springify().damping(8).mass(0.3).delay(200)}
-          className="mb-10"
+          className="mb-16"
         >
           <Text className="text-xs font-medium text-steel mb-2 ml-1 uppercase tracking-wider">Descripción</Text>
           <TextInput
@@ -108,7 +108,7 @@ export default function RegisterScreen() {
         </Animated.View>
 
         {/* Selection Cards */}
-        <View className="mb-10" style={{ gap: 14 }}>
+        <View className="mb-16" style={{ gap: 16 }}>
           {/* Wallet - Section 3 */}
           <Animated.View entering={FadeInLeft.springify().damping(8).mass(0.3).delay(300)}>
           <TouchableOpacity
