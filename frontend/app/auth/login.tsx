@@ -19,10 +19,9 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await authService.login(email, password);
-      // Navigate to main app (tabs)
       router.replace('/(tabs)');
     } catch (error: any) {
-      const message = error.response?.data?.detail || 'Error al iniciar sesión';
+      const message = error.response?.data?.detail || 'Error al iniciar sesión. Verifica tus credenciales.';
       Alert.alert('Error de autenticación', message);
     } finally {
       setLoading(false);
@@ -35,8 +34,12 @@ export default function LoginScreen() {
       className="flex-1 bg-bone"
     >
       <ScrollView contentContainerClassName="flex-grow p-6 justify-center">
-        <View className="mb-10 items-center">
-          <Text className="text-4xl font-bold text-noir mb-2">
+        {/* Logo */}
+        <View className="items-center mb-10">
+          <View className="w-20 h-20 bg-denim rounded-3xl mb-4 items-center justify-center">
+            <Text className="text-4xl text-bone font-bold">$</Text>
+          </View>
+          <Text className="text-3xl font-bold text-noir mb-2">
             Bienvenido
           </Text>
           <Text className="text-lg text-concrete text-center">

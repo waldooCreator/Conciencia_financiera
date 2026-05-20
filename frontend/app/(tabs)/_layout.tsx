@@ -3,9 +3,10 @@ import { View, Text } from 'react-native';
 
 function TabIcon({ label, focused }: { label: string; focused: boolean }) {
   return (
-    <View className="items-center justify-center">
+    <View className="items-center justify-center py-1">
+      <View className={`w-1.5 h-1.5 rounded-full mb-1 ${focused ? 'bg-noir' : 'bg-transparent'}`} />
       <Text
-        className={`text-xs font-medium ${focused ? 'text-noir' : 'text-concrete'}`}
+        className={`text-xs font-semibold ${focused ? 'text-noir' : 'text-concrete'}`}
       >
         {label}
       </Text>
@@ -22,11 +23,14 @@ export default function TabsLayout() {
           backgroundColor: '#f9f5ed',
           borderTopColor: '#c9ccc3',
           borderTopWidth: 1,
-          paddingTop: 8,
+          paddingTop: 4,
           paddingBottom: 8,
-          height: 60,
+          height: 64,
+          elevation: 0,
+          shadowOpacity: 0,
         },
         tabBarShowLabel: false,
+        sceneStyle: { backgroundColor: '#f9f5ed' },
       }}
     >
       <Tabs.Screen
