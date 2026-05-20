@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, TouchableOpacity, Modal } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { TransactionCard } from '../../src/components';
+import { PrimaryButton } from '../../src/components';
 import { transactionService, walletService, goalService } from '../../src/services/finance';
 import { TransactionSummary, Transaction, Wallet, SavingsGoal } from '../../src/types';
 
@@ -11,6 +12,8 @@ export default function DashboardScreen() {
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -137,10 +140,8 @@ export default function DashboardScreen() {
               description={tx.description}
               installments={tx.installments > 1 ? { current: tx.current_installment, total: tx.installments } : undefined}
             />
-            <View className="flex-row justify-end mb-3 -mt-2 px-4 gap-2">
-              <TouchableOpacity onPress={async () => {
-                try { await transactionService.delete(tx.id); loadData(); } catch {}
-              }} className="bg-red-500/20 px-3 py-1 rounded-lg">
+            <View className="flex-row justify-end mb-3 -mt-2 px-4" style={{gap: 6}}>
+              <TouchableOpacity onPress={() => setDeleteTarget(tx)} className="bg-red-500/20 px-3 py-1 rounded-lg">
                 <Text className="text-red-400 text-xs">Eliminar</Text>
               </TouchableOpacity>
             </View>
@@ -154,5 +155,17 @@ export default function DashboardScreen() {
         </View>
       )}
     </ScrollView>
+
+      {/* Delete Transaction Modal */}
+      <Modal visible={deleteTarget !== null} transparent animationType="fade">
+        <View className="flex-1 bg-noir/50 justify-center items-center p-6">
+          <View className="bg-bone rounded-2xl p-6 w-80">
+            <Text className="text-xl font-bold text-noir mb-2">Eliminar</Text>
+            <Text className="text-concrete mb-6">¿Eliminar esta transacción?</Text>
+            <View className="flex-row"><View className="flex-1 mr-2"><PrimaryButton title="Cancelar" onPress={() => setDeleteTarget(null)} variant="secondary" /></View><View className="flex-1 ml-2"><PrimaryButton title="Eliminar" onPress={async () => { if (!deleteTarget) return; setDeleteLoading(true); try { await transactionService.delete(deleteTarget.id); setDeleteTarget(null); loadData(); } catch {} finally { setDeleteLoading(false); }}} loading={deleteLoading} /></View></View>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
