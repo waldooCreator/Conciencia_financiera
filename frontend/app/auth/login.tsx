@@ -19,7 +19,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await authService.login(email, password);
-      router.replace('/(tabs)');
+      router.replace('/dashboard');
     } catch (error: any) {
       const message = error.response?.data?.detail || 'Error al iniciar sesión. Verifica tus credenciales.';
       Alert.alert('Error de autenticación', message);

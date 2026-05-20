@@ -21,7 +21,7 @@ export default function OnboardingScreen() {
       setCurrentStep(currentStep + 1);
     } else {
       // Finish onboarding
-      router.replace('/(tabs)');
+      router.replace('/register');
     }
   };
 
