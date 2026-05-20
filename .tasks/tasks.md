@@ -153,10 +153,70 @@
   - Balance de tarjeta de crédito representa la deuda total
 
 ## Fase 3: Infraestructura y UI Core (Frontend PWA)
-- [ ] 3.1 Inicializar proyecto Expo (React Native) con soporte explícito para PWA (Web).
-- [ ] 3.2 Configurar Tailwind CSS / NativeWind mapeando estrictamente los Design Tokens del `design.md` (`noir`, `denim`, `bone`, `steel`, `concrete`).
-- [ ] 3.3 Construir componentes atómicos base: `<PrimaryButton />` (con animación de escala) y `<FormInput />`.
-- [ ] 3.4 Construir el componente `<TransactionCard />` aplicando los estilos de bordes y tipografía del sistema.
+- [x] 3.1 Inicializar proyecto Expo (React Native) con soporte explícito para PWA (Web).
+  - **Fecha de completado:** 20/05/2026
+  - **Implementación:**
+    - `babel.config.js` configurado con `nativewind/babel` preset
+    - `metro.config.js` configurado con `withNativeWind` para procesar CSS
+    - `global.css` con directivas de Tailwind (`@tailwind base/components/utilities`)
+    - `tsconfig.json` con paths `@/*` apuntando a `src/*`
+    - `nativewind-env.d.ts` para tipos de NativeWind
+    - `app/_layout.tsx` con `SafeAreaProvider`, `StatusBar`, y `Stack` navigation
+    - `app/index.tsx` como pantalla de bienvenida
+    - Estructura de navegación `app/(tabs)/` con expo-router
+    - `src/services/api.ts` con Axios configurado:
+      - Interceptor de request para agregar token JWT
+      - Interceptor de response para refresh automático de tokens
+      - URL base configurable via `EXPO_PUBLIC_API_URL`
+    - `src/services/auth.ts` con funciones: `login`, `register`, `logout`, `isAuthenticated`, `getUser`
+    - `src/types/index.ts` con interfaces TypeScript para todas las entidades
+- [x] 3.2 Configurar Tailwind CSS / NativeWind mapeando estrictamente los Design Tokens del `design.md` (`noir`, `denim`, `bone`, `steel`, `concrete`).
+  - **Fecha de completado:** 20/05/2026
+  - **Implementación:**
+    - `tailwind.config.js` con `nativewind/preset`
+    - Design tokens mapeados en `theme.extend.colors`:
+      - `noir`: `#030706`
+      - `denim`: `#20394a`
+      - `bone`: `#f9f5ed`
+      - `steel`: `#6196aa`
+      - `concrete`: `#c9ccc3`
+    - Clases utilitarias funcionando: `bg-noir`, `text-bone`, `border-steel`, etc.
+- [x] 3.3 Construir componentes atómicos base: `<PrimaryButton />` (con animación de escala) y `<FormInput />`.
+  - **Fecha de completado:** 20/05/2026
+  - **Implementación:**
+    - **PrimaryButton** (`src/components/PrimaryButton.tsx`):
+      - `Pressable` con `bg-noir` (primario) o `bg-steel` (secundario)
+      - Texto `text-bone`
+      - Animación `active:scale-95` al presionar
+      - Soporte para estado `loading` con `ActivityIndicator`
+      - Soporte para estado `disabled` con opacidad reducida
+      - Props: `title`, `onPress`, `loading`, `disabled`, `variant`, `style`, `textStyle`
+    - **FormInput** (`src/components/FormInput.tsx`):
+      - Fondo translúcido `bg-bone/50`
+      - Borde por defecto `border-concrete`
+      - Borde activo `border-2 border-steel` al hacer focus
+      - Soporte para `label`, `error`, `icon`
+      - Placeholder en color `concrete`
+      - Texto en color `noir`
+- [x] 3.4 Construir el componente `<TransactionCard />` aplicando los estilos de bordes y tipografía del sistema.
+  - **Fecha de completado:** 20/05/2026
+  - **Implementación:**
+    - **TransactionCard** (`src/components/TransactionCard.tsx`):
+      - Contenedor `bg-denim` con bordes `rounded-2xl`
+      - Muestra: categoría, descripción, medio de pago, monto
+      - Monto en verde para ingresos (`text-green-400`), blanco para gastos
+      - Soporte para mostrar cuotas (`current/total cuotas`)
+      - Fecha separada con borde superior `border-steel/20`
+      - Props: `amount`, `type`, `category`, `walletName`, `date`, `description`, `installments`
+    - **Bottom Navigation Bar** (`app/(tabs)/_layout.tsx`):
+      - 4 tabs: Registro (default), Dashboard, Cuentas, Configuración
+      - Estilo: fondo `bone`, borde superior `concrete`
+      - Indicador de tab activa con color `noir`
+    - **Pantallas creadas:**
+      - `register.tsx`: Formulario de registro de gasto (fricción cero)
+      - `dashboard.tsx`: KPIs (meta de ahorro, proyección de deuda, transacciones recientes)
+      - `accounts.tsx`: Lista de medios de pago con saldos
+      - `settings.tsx`: Perfil, categorías, preferencias, cerrar sesión
 
 ## Fase 4: Flujos de Usuario y Pantallas (Frontend)
 - [ ] 4.1 Implementar pantalla de Login/Registro estándar conectada al backend (JWT).
