@@ -58,7 +58,30 @@
       - `make shell`, `make logs`, `make clean`, `make test`
     - `backend/apps/health/` con endpoint de health check (`/api/health/`)
     - `.env.development` con variables de entorno para desarrollo local
-- [ ] 1.3 Inicializar proyecto Django y configurar conexión a la base de datos PostgreSQL dentro de Docker.
+- [x] 1.3 Inicializar proyecto Django y configurar conexión a la base de datos PostgreSQL dentro de Docker.
+  - **Fecha de completado:** 19/05/2026
+  - **Implementación:**
+    - Modelo `User` personalizado creado (`backend/apps/users/models.py`):
+      - Usa email como identificador único en lugar de username
+      - Hereda de `AbstractBaseUser` y `PermissionsMixin`
+      - Manager personalizado (`UserManager`) para crear usuarios y superusuarios
+      - Campos: `email`, `first_name`, `last_name`, `is_active`, `is_staff`, `date_joined`, `updated_at`
+    - Admin de Django configurado para el modelo User (`backend/apps/users/admin.py`)
+    - Serializers creados (`backend/apps/users/serializers.py`):
+      - `UserSerializer` para perfil de usuario
+      - `RegisterSerializer` para registro con validación de contraseña
+    - Vistas de API creadas (`backend/apps/users/views.py`):
+      - `RegisterView` (POST `/api/users/register/`) - Registro público
+      - `UserProfileView` (GET/PATCH `/api/users/profile/`) - Perfil autenticado
+    - URLs configuradas (`backend/apps/users/urls.py`)
+    - Migraciones generadas y aplicadas exitosamente (`backend/apps/users/migrations/0001_initial.py`)
+    - Conexión a PostgreSQL verificada y funcional dentro de Docker
+    - Superusuario de desarrollo creado automáticamente: `admin@finanzas.local / admin123`
+    - Health check endpoint funcionando: `http://localhost:8000/api/health/`
+    - **Pruebas exitosas:**
+      - Todos los contenedores corriendo (backend, db, redis)
+      - Migraciones aplicadas correctamente
+      - Base de datos conectada y operativa
 - [ ] 1.4 Instalar y configurar Django REST Framework (DRF) y JWT para autenticación.
 
 ## Fase 2: Modelado de Datos y API (Backend)
