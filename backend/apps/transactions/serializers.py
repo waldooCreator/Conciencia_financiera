@@ -39,36 +39,32 @@ class TransactionSerializer(serializers.ModelSerializer):
         amount = data.get('amount')
 
         if wallet and transaction_type:
-            # Check wallet ownership
             if wallet.user != self.context['request'].user:
                 raise serializers.ValidationError({
-                    'wallet': 'You can only use your own wallets'
+                    'wallet': 'Solo puedes usar tus propios medios de pago'
                 })
 
-            # For expenses, check if wallet has sufficient balance
+            # For expenses, check sufficient funds
             if transaction_type == Transaction.TransactionType.EXPENSE:
                 if wallet.type == Wallet.WalletType.CREDIT:
-                    # For credit cards, check available credit
                     available = wallet.credit_limit - wallet.balance if wallet.credit_limit else None
                     if available is not None and amount > available:
                         raise serializers.ValidationError({
-                            'amount': 'Insufficient credit available'
+                            'amount': 'Crédito insuficiente'
                         })
                 else:
-                    # For cash/debit, check balance
                     if amount > wallet.balance:
                         raise serializers.ValidationError({
-                            'amount': 'Insufficient balance'
+                            'amount': 'Saldo insuficiente'
                         })
 
         return data
 
     def create(self, validated_data):
-        """Create a new transaction and update wallet balance."""
+        """Create transaction and update wallet balance realistically."""
         user = self.context['request'].user
         validated_data['user'] = user
 
-        # Set default date if not provided
         if 'date' not in validated_data or not validated_data.get('date'):
             validated_data['date'] = timezone.now()
 
@@ -76,12 +72,17 @@ class TransactionSerializer(serializers.ModelSerializer):
         transaction_type = validated_data['type']
         amount = validated_data['amount']
 
-        # Update wallet balance based on transaction type
+        # Realistic balance logic:
+        # INCOME → balance increases for ALL wallets
+        # EXPENSE with CASH/DEBIT → balance decreases
+        # EXPENSE with CREDIT → balance increases (balance = debt owed)
         if transaction_type == Transaction.TransactionType.INCOME:
             wallet.balance += amount
         elif transaction_type == Transaction.TransactionType.EXPENSE:
-            wallet.balance += amount  # For credit cards, balance represents debt
+            if wallet.type == Wallet.WalletType.CREDIT:
+                wallet.balance += amount  # Credit card debt increases
+            else:
+                wallet.balance -= amount  # Cash/Debit balance decreases
 
         wallet.save()
-
         return super().create(validated_data)

@@ -9,43 +9,35 @@ from django.db.models import Sum, Q
 from django.utils import timezone
 from .models import Transaction
 from .serializers import TransactionSerializer
+from apps.wallets.models import Wallet
 
 
 class TransactionViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for managing transactions.
-    Users can only access their own transactions.
-    """
+    """ViewSet for managing transactions."""
     serializer_class = TransactionSerializer
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        """Return only the current user's transactions."""
-        queryset = Transaction.objects.filter(user=self.request.user)
-        
-        # Filter by type if provided
-        transaction_type = self.request.query_params.get('type')
-        if transaction_type:
-            queryset = queryset.filter(type=transaction_type)
-        
-        # Filter by wallet if provided
-        wallet_id = self.request.query_params.get('wallet')
-        if wallet_id:
-            queryset = queryset.filter(wallet_id=wallet_id)
-        
-        # Filter by date range if provided
-        start_date = self.request.query_params.get('start_date')
-        end_date = self.request.query_params.get('end_date')
-        if start_date:
-            queryset = queryset.filter(date__gte=start_date)
-        if end_date:
-            queryset = queryset.filter(date__lte=end_date)
-        
-        return queryset
+        return Transaction.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        """Create transaction associated with the current user."""
         serializer.save(user=self.request.user)
+
+    def perform_destroy(self, instance):
+        """Reverse wallet balance when deleting a transaction."""
+        wallet = instance.wallet
+        amount = instance.amount
+
+        if instance.type == Transaction.TransactionType.INCOME:
+            wallet.balance -= amount  # Reverse income
+        elif instance.type == Transaction.TransactionType.EXPENSE:
+            if wallet.type == Wallet.WalletType.CREDIT:
+                wallet.balance -= amount  # Reverse credit card debt
+            else:
+                wallet.balance += amount  # Reverse cash/debit expense
+
+        wallet.save()
+        instance.delete()
 
     @action(detail=False, methods=['get'])
     def summary(self, request):
