@@ -82,7 +82,31 @@
       - Todos los contenedores corriendo (backend, db, redis)
       - Migraciones aplicadas correctamente
       - Base de datos conectada y operativa
-- [ ] 1.4 Instalar y configurar Django REST Framework (DRF) y JWT para autenticación.
+- [x] 1.4 Instalar y configurar Django REST Framework (DRF) y JWT para autenticación.
+  - **Fecha de completado:** 19/05/2026
+  - **Implementación:**
+    - DRF configurado en `settings.py`:
+      - `DEFAULT_AUTHENTICATION_CLASSES`: JWT Authentication
+      - `DEFAULT_PERMISSION_CLASSES`: IsAuthenticated (por defecto)
+      - `DEFAULT_PAGINATION_CLASS`: PageNumberPagination (PAGE_SIZE: 20)
+    - SimpleJWT configurado con:
+      - Access token lifetime: 60 minutos (configurable)
+      - Refresh token lifetime: 1440 minutos (24 horas, configurable)
+      - Rotación de refresh tokens activada
+      - Blacklist después de rotación
+      - Algoritmo HS256
+    - Custom JWT Serializer (`backend/apps/users/tokens.py`):
+      - Extiende `TokenObtainPairSerializer`
+      - Retorna datos del usuario junto con access y refresh tokens
+      - Respuesta unificada: `{access, refresh, user: {...}, message}`
+    - Custom JWT View (`CustomTokenObtainPairView`):
+      - Reemplaza la vista por defecto de SimpleJWT
+      - Integrada en `config/urls.py`
+    - **Flujo JWT verificado exitosamente:**
+      1. `POST /api/users/register/` → Registro con email + password
+      2. `POST /api/token/` → Login retorna `{access, refresh, user}`
+      3. `GET /api/users/profile/` → Acceso protegido con `Bearer <token>`
+      4. `POST /api/token/refresh/` → Refresh de token de acceso
 
 ## Fase 2: Modelado de Datos y API (Backend)
 - [ ] 2.1 Crear modelo `User` personalizado (si es necesario) y modelos `Wallet`, `Category`, `Transaction` y `SavingsGoal` según el `design.md`.
