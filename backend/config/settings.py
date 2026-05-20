@@ -157,4 +157,4 @@ SIMPLE_JWT = {
 }
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:8081').split(',')
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:8081,http://localhost:19006').split(',')

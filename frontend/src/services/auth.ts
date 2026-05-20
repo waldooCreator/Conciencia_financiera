@@ -28,13 +28,10 @@ export const authService = {
   },
 
   async register(email: string, password: string, password_confirm: string, first_name?: string, last_name?: string): Promise<any> {
-    const response = await api.post('/users/register/', {
-      email,
-      password,
-      password_confirm,
-      first_name,
-      last_name,
-    });
+    const payload: any = { email, password, password_confirm };
+    if (first_name) payload.first_name = first_name;
+    if (last_name) payload.last_name = last_name;
+    const response = await api.post('/users/register/', payload);
     return response.data;
   },
 
