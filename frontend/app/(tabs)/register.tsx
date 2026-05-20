@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, Alert, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { FormInput, PrimaryButton } from '../../src/components';
 import { walletService, categoryService, transactionService } from '../../src/services/finance';
@@ -10,6 +10,8 @@ export default function RegisterScreen() {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [isOnline, setIsOnline] = useState(true);
   
   const [wallets, setWallets] = useState<Wallet[]>([]);
@@ -47,8 +49,10 @@ export default function RegisterScreen() {
   };
 
   const handleSave = async () => {
+    setErrorMsg('');
+    setSuccessMsg('');
     if (!amount || !selectedWallet) {
-      Alert.alert('Error', 'Ingresa un monto y selecciona un medio de pago');
+      setErrorMsg('Ingresa un monto y selecciona un medio de pago');
       return;
     }
 
@@ -57,19 +61,16 @@ export default function RegisterScreen() {
       const online = await syncService.isOnline();
       
       if (online) {
-        // Online: send directly to API
         await transactionService.create({
           amount: parseFloat(amount),
           type: 'expense',
           description,
           wallet: selectedWallet.id,
           category: selectedCategory?.id,
-          installments: selectedWallet.type === 'credit' ? 1 : 1,
+          installments: 1,
         });
-        
-        Alert.alert('Éxito', 'Gasto registrado correctamente');
+        setSuccessMsg('¡Gasto registrado correctamente!');
       } else {
-        // Offline: queue for later sync
         await syncService.queueTransaction({
           amount: parseFloat(amount),
           type: 'expense',
@@ -79,18 +80,16 @@ export default function RegisterScreen() {
           installments: 1,
           is_synced: false,
         });
-        
-        Alert.alert(
-          'Guardado Offline',
-          'Sin conexión. El gasto se sincronizará automáticamente cuando recuperes la conexión.'
-        );
+        setSuccessMsg('Guardado offline. Se sincronizará al recuperar conexión.');
       }
       
       setAmount('');
       setDescription('');
     } catch (error: any) {
-      const msg = error.response?.data?.amount || 'Error al registrar el gasto';
-      Alert.alert('Error', typeof msg === 'string' ? msg : JSON.stringify(msg));
+      const data = error.response?.data;
+      if (data?.amount) setErrorMsg(Array.isArray(data.amount) ? data.amount[0] : String(data.amount));
+      else if (data?.detail) setErrorMsg(data.detail);
+      else setErrorMsg('Error al registrar el gasto');
     } finally {
       setLoading(false);
     }
@@ -156,6 +155,17 @@ export default function RegisterScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {errorMsg ? (
+        <View className="bg-red-50 border border-red-400 rounded-xl p-3 mb-4">
+          <Text className="text-red-600 text-center">{errorMsg}</Text>
+        </View>
+      ) : null}
+      {successMsg ? (
+        <View className="bg-green-50 border border-green-400 rounded-xl p-3 mb-4">
+          <Text className="text-green-700 text-center">{successMsg}</Text>
+        </View>
+      ) : null}
 
       <View className="mt-6">
         <PrimaryButton
