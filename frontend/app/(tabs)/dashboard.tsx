@@ -117,7 +117,7 @@ export default function DashboardScreen() {
           ))
         ) : (
           <View className="items-center justify-center py-12">
-            <Text className="text-4xl mb-3">📊</Text>
+            <Text className="text-4xl mb-3"><Target size={40} strokeWidth={2} color="#c9ccc3" /></Text>
             <Text className="text-concrete text-lg">No hay transacciones aún</Text>
             <Text className="text-concrete text-sm mt-1">Registra tu primer gasto para comenzar</Text>
           </View>

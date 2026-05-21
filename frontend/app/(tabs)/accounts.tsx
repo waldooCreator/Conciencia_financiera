@@ -1,11 +1,17 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, RefreshControl, TouchableOpacity, Modal } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { Banknote, CreditCard, Landmark, X } from 'lucide-react-native';
 import { FormInput, PrimaryButton } from '../../src/components';
 import { walletService } from '../../src/services/finance';
 import { Wallet } from '../../src/types';
 
-const walletIcons: Record<string, string> = { cash: '💵', debit: '🏦', credit: '💳' };
+const walletIcons = (type: string) => {
+  const props = { size: 22, strokeWidth: 2, color: '#6196aa' };
+  if (type === 'cash') return <Banknote {...props} />;
+  if (type === 'credit') return <CreditCard {...props} />;
+  return <Landmark {...props} />;
+};
 const walletTypeLabels: Record<string, string> = { cash: 'Efectivo', debit: 'Cuenta Débito', credit: 'Tarjeta de Crédito' };
 
 export default function AccountsScreen() {
@@ -71,7 +77,7 @@ export default function AccountsScreen() {
         {wallets.map((w) => (
           <View key={w.id} className="bg-denim rounded-2xl p-4 mb-3">
             <View className="flex-row justify-between items-center">
-              <View className="flex-row items-center flex-1"><Text className="text-2xl mr-3">{walletIcons[w.type]}</Text><View><Text className="text-bone font-semibold text-lg">{w.name}</Text><Text className="text-steel text-sm">{walletTypeLabels[w.type]}</Text></View></View>
+              <View className="flex-row items-center flex-1"><View className="mr-3">{walletIcons(w.type)}</View><View><Text className="text-bone font-semibold text-lg">{w.name}</Text><Text className="text-steel text-sm">{walletTypeLabels[w.type]}</Text></View></View>
               <View className="items-end"><Text className="text-bone text-xl font-bold">${parseFloat(w.balance).toLocaleString()}</Text>{w.type === 'credit' && w.credit_limit && <Text className="text-concrete text-xs mt-1">Límite: ${parseFloat(w.credit_limit).toLocaleString()}</Text>}</View>
             </View>
             <View className="flex-row mt-3 pt-3 border-t border-steel/20" style={{gap: 6}}>
@@ -110,7 +116,7 @@ export default function AccountsScreen() {
         <View className="flex-1 bg-noir/50 justify-center items-center">
           <View className="bg-bone rounded-2xl p-6 w-72">
             <Text className="text-xl font-bold text-noir mb-4">Tipo de Cuenta</Text>
-            {Object.entries(walletTypeLabels).map(([k, l]) => (<TouchableOpacity key={k} className="py-3 border-b border-concrete/20" onPress={() => { setType(k as any); setShowTypePicker(false); }}><Text className={`text-lg ${type === k ? 'text-steel font-semibold' : 'text-noir'}`}>{walletIcons[k]} {l}</Text></TouchableOpacity>))}
+            {Object.entries(walletTypeLabels).map(([k, l]) => (<TouchableOpacity key={k} className="py-3 border-b border-concrete/20 flex-row items-center" onPress={() => { setType(k as any); setShowTypePicker(false); }}><View className="mr-3">{walletIcons(k)}</View><Text className={`text-lg ${type === k ? 'text-steel font-semibold' : 'text-noir'}`}>{l}</Text></TouchableOpacity>))}
             <TouchableOpacity className="mt-4 py-3 bg-steel rounded-xl items-center" onPress={() => setShowTypePicker(false)}><Text className="text-bone font-semibold">Cerrar</Text></TouchableOpacity>
           </View>
         </View>

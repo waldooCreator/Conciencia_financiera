@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
 import Animated, { FadeInLeft, FadeInRight } from 'react-native-reanimated';
+import { Banknote, CreditCard, Landmark, ChevronRight, X } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { walletService, categoryService, transactionService } from '../../src/services/finance';
@@ -52,7 +53,12 @@ export default function RegisterScreen() {
     } finally { setLoading(false); }
   };
 
-  const walletIcon = { cash: '💵', debit: '🏦', credit: '💳' };
+  const walletIcon = (type: string) => {
+    const props = { size: 22, strokeWidth: 2, color: '#6196aa' };
+    if (type === 'cash') return <Banknote {...props} />;
+    if (type === 'credit') return <CreditCard {...props} />;
+    return <Landmark {...props} />;
+  };
 
   return (
     <View className="flex-1 bg-bone" style={{ paddingTop: insets.top }}>
@@ -117,7 +123,7 @@ export default function RegisterScreen() {
             className="border border-concrete rounded-2xl px-5 py-4 flex-row items-center justify-between"
           >
             <View className="flex-row items-center flex-1">
-              <Text className="text-xl mr-3">{walletIcon[selectedWallet?.type || 'cash']}</Text>
+              <View className="mr-3">{walletIcon(selectedWallet?.type || 'cash')}</View>
               <View>
                 <Text className="text-noir text-base font-medium">
                   {selectedWallet?.name || 'Medio de pago'}
@@ -131,7 +137,7 @@ export default function RegisterScreen() {
                 )}
               </View>
             </View>
-            <Text className="text-concrete text-lg">›</Text>
+            <ChevronRight size={20} color="#c9ccc3" />
           </TouchableOpacity>
           </Animated.View>
 
@@ -151,7 +157,7 @@ export default function RegisterScreen() {
                 {selectedCategory?.name || 'Categoría'}
               </Text>
             </View>
-            <Text className="text-concrete text-lg">›</Text>
+            <ChevronRight size={20} color="#c9ccc3" />
           </TouchableOpacity>
           </Animated.View>
         </View>
@@ -186,7 +192,7 @@ export default function RegisterScreen() {
             <View className="flex-row justify-between items-center mb-5">
               <Text className="text-xl font-semibold text-noir">Medio de Pago</Text>
               <TouchableOpacity onPress={() => setShowWalletModal(false)} className="w-8 h-8 rounded-full bg-concrete/20 items-center justify-center">
-                <Text className="text-noir text-sm">✕</Text>
+                <X size={16} color="#030706" strokeWidth={2} />
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -197,7 +203,7 @@ export default function RegisterScreen() {
                   className={`mb-2 rounded-2xl px-5 py-4 flex-row items-center ${selectedWallet?.id === w.id ? 'bg-steel/10' : ''}`}
                   activeOpacity={0.7}
                 >
-                  <Text className="text-2xl mr-4">{walletIcon[w.type]}</Text>
+                  <View className="mr-4">{walletIcon(w.type)}</View>
                   <View className="flex-1">
                     <Text className={`font-medium text-base ${selectedWallet?.id === w.id ? 'text-steel' : 'text-noir'}`}>{w.name}</Text>
                     <Text className="text-concrete text-xs mt-0.5">
@@ -219,7 +225,7 @@ export default function RegisterScreen() {
             <View className="flex-row justify-between items-center mb-5">
               <Text className="text-xl font-semibold text-noir">Categoría</Text>
               <TouchableOpacity onPress={() => setShowCategoryModal(false)} className="w-8 h-8 rounded-full bg-concrete/20 items-center justify-center">
-                <Text className="text-noir text-sm">✕</Text>
+                <X size={16} color="#030706" strokeWidth={2} />
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>

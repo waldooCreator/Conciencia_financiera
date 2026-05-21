@@ -1,18 +1,14 @@
 import { Tabs } from 'expo-router';
 import { View, Text } from 'react-native';
+import { PlusCircle, LayoutDashboard, Wallet, Settings } from 'lucide-react-native';
 
-const tabIcons: Record<string, string> = {
-  register: '💸',
-  dashboard: '📊',
-  accounts: '💳',
-  settings: '⚙️',
-};
+const iconProps = { size: 22, strokeWidth: 2 };
 
-function TabIcon({ label, icon, focused }: { label: string; icon: string; focused: boolean }) {
+function TabIcon({ Icon, label, focused }: { Icon: any; label: string; focused: boolean }) {
   return (
     <View className="items-center justify-center py-1">
-      <Text className={`text-lg mb-0.5 ${focused ? 'opacity-100' : 'opacity-40'}`}>{icon}</Text>
-      <Text className={`text-[10px] font-semibold ${focused ? 'text-steel' : 'text-concrete'}`}>
+      <Icon {...iconProps} color={focused ? '#030706' : '#c9ccc3'} />
+      <Text className={`text-[10px] font-semibold mt-0.5 ${focused ? 'text-noir' : 'text-concrete'}`}>
         {label}
       </Text>
     </View>
@@ -38,10 +34,10 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: '#f9f5ed' },
       }}
     >
-      <Tabs.Screen name="register" options={{ tabBarIcon: ({ focused }) => <TabIcon label="Registro" icon={tabIcons.register} focused={focused} /> }} />
-      <Tabs.Screen name="dashboard" options={{ tabBarIcon: ({ focused }) => <TabIcon label="Dashboard" icon={tabIcons.dashboard} focused={focused} /> }} />
-      <Tabs.Screen name="accounts" options={{ tabBarIcon: ({ focused }) => <TabIcon label="Cuentas" icon={tabIcons.accounts} focused={focused} /> }} />
-      <Tabs.Screen name="settings" options={{ tabBarIcon: ({ focused }) => <TabIcon label="Config" icon={tabIcons.settings} focused={focused} /> }} />
+      <Tabs.Screen name="register" options={{ tabBarIcon: ({ focused }) => <TabIcon Icon={PlusCircle} label="Registro" focused={focused} /> }} />
+      <Tabs.Screen name="dashboard" options={{ tabBarIcon: ({ focused }) => <TabIcon Icon={LayoutDashboard} label="Dashboard" focused={focused} /> }} />
+      <Tabs.Screen name="accounts" options={{ tabBarIcon: ({ focused }) => <TabIcon Icon={Wallet} label="Cuentas" focused={focused} /> }} />
+      <Tabs.Screen name="settings" options={{ tabBarIcon: ({ focused }) => <TabIcon Icon={Settings} label="Config" focused={focused} /> }} />
     </Tabs>
   );
 }
