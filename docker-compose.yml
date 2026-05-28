@@ -16,7 +16,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-finanzas_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-finanzas_password}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-3022}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infrastructure/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -48,7 +48,7 @@ services:
       - ./backend:/app:cached
       - backend_static:/app/staticfiles
     ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      - "${BACKEND_PORT:-3021}:8000"
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-django-insecure-dev-key-change-in-production}
       - DJANGO_DEBUG=${DJANGO_DEBUG:-True}
@@ -83,7 +83,7 @@ services:
     container_name: finanzas_frontend
     restart: unless-stopped
     ports:
-      - "${FRONTEND_PORT:-80}:80"
+      - "${FRONTEND_PORT:-3020}:80"
     depends_on:
       backend:
         condition: service_healthy
@@ -102,7 +102,7 @@ services:
     container_name: finanzas_redis
     restart: unless-stopped
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${REDIS_PORT:-3023}:6379"
     volumes:
       - redis_data:/data
     networks:
