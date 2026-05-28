@@ -1,5 +1,5 @@
 import api from './api';
-import { Wallet, Category, Transaction, TransactionSummary, SavingsGoal } from '../types';
+import { Wallet, Category, Transaction, TransactionSummary, MonthComparison, SavingsGoal } from '../types';
 
 // DRF returns paginated responses: { count, next, previous, results: [] }
 // This helper extracts the array, supporting both paginated and non-paginated responses
@@ -22,6 +22,7 @@ export const categoryService = {
   create: (data: Partial<Category>) => api.post<Category>('/categories/', data),
   update: (id: number, data: Partial<Category>) => api.patch(`/categories/${id}/`, data),
   delete: (id: number) => api.delete(`/categories/${id}/`),
+  seedDefaults: () => api.post('/categories/seed_defaults/').then(res => res.data),
 };
 
 export const transactionService = {
@@ -31,6 +32,7 @@ export const transactionService = {
   update: (id: number, data: Partial<Transaction>) => api.patch(`/transactions/${id}/`, data),
   delete: (id: number) => api.delete(`/transactions/${id}/`),
   getSummary: () => api.get<TransactionSummary>('/transactions/summary/'),
+  getComparison: () => api.get<MonthComparison>('/transactions/comparison/'),
 };
 
 export const goalService = {

@@ -5,7 +5,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from .models import SavingsGoal
 from .serializers import SavingsGoalSerializer
 
@@ -33,7 +33,13 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
         Expects: {"amount": 100.00}
         """
         goal = self.get_object()
-        amount = Decimal(request.data.get('amount', 0))
+        try:
+            amount = Decimal(request.data.get('amount', 0))
+        except (InvalidOperation, TypeError, ValueError):
+            return Response(
+                {'error': 'El monto debe ser un número válido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         if amount <= 0:
             return Response(
@@ -54,7 +60,13 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
         Expects: {"amount": 50.00}
         """
         goal = self.get_object()
-        amount = Decimal(request.data.get('amount', 0))
+        try:
+            amount = Decimal(request.data.get('amount', 0))
+        except (InvalidOperation, TypeError, ValueError):
+            return Response(
+                {'error': 'El monto debe ser un número válido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         if amount <= 0:
             return Response(

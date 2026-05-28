@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, Animated, Dimensions, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { FormInput, PrimaryButton } from '../../src/components';
-import { walletService, goalService } from '../../src/services/finance';
+import { walletService, goalService, categoryService } from '../../src/services/finance';
 
 const { width } = Dimensions.get('window');
 
@@ -49,19 +49,23 @@ export default function OnboardingScreen() {
   const finishOnboarding = async () => {
     setLoading(true); setErrorMsg('');
     try {
-      const cv = parseFloat(cashBalance) || 0;
-      if (cv > 0) await walletService.create({ name: 'Efectivo', type: 'cash', balance: cv });
+      // Create wallets
+      const cv = cashBalance || '0';
+      await walletService.create({ name: 'Efectivo', type: 'cash', balance: cv });
 
       for (const da of debitAccounts) {
-        if (da.balance > 0) await walletService.create({ name: da.name, type: 'debit', balance: da.balance });
+        await walletService.create({ name: da.name, type: 'debit', balance: String(da.balance) });
       }
 
       for (const cc of creditCards) {
-        await walletService.create({ name: cc.name, type: 'credit', balance: 0, credit_limit: cc.limit });
+        await walletService.create({ name: cc.name, type: 'credit', balance: '0', credit_limit: String(cc.limit) });
       }
 
-      const gv = parseFloat(goalAmount) || 0;
-      if (gv > 0) await goalService.create({ name: 'Mi Meta de Ahorro', target_amount: gv });
+      // Create default categories via backend seed endpoint
+      await categoryService.seedDefaults();
+
+      const gv = goalAmount || '0';
+      if (parseFloat(gv) > 0) await goalService.create({ name: 'Mi Meta de Ahorro', target_amount: gv });
 
       router.replace('/register');
     } catch { setErrorMsg('Error al configurar. Intenta de nuevo.'); }

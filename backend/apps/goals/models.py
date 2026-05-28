@@ -52,7 +52,4 @@ class SavingsGoal(models.Model):
     @property
     def remaining_amount(self):
         """Calculate the remaining amount to reach the goal."""
-        diff = self.target_amount - self.current_amount
-        if diff < 0:
-            return diff - diff  # returns Decimal('0')
-        return diff
+        return max(Decimal('0'), self.target_amount - self.current_amount)

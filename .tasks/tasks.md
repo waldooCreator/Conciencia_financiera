@@ -277,3 +277,141 @@
     - `getPendingCount()`: Obtiene cantidad de transacciones pendientes
     - `clearQueue()`: Limpia la cola manualmente
     - Dependencia `@react-native-community/netinfo` agregada al package.json
+
+## Fase 6: Mejoras Post-MVP (Estudio de Mejora)
+
+### 6.1 Transferencias / Pago de Tarjeta de Crédito
+- [x] 6.1.1 Agregar campo `destination_wallet` al modelo Transaction y generar migración.
+  - **Fecha de completado:** 27/05/2026
+  - **Implementación:** Campo `destination_wallet` (ForeignKey, nullable, related_name='incoming_transfers') agregado al modelo. Migración `0002` generada y aplicada.
+- [x] 6.1.2 Actualizar serializer: eliminar bloqueo de TRANSFER, validar destino, aplicar balance a ambos wallets.
+  - **Fecha de completado:** 27/05/2026
+  - **Implementación:**
+    - Eliminado el bloqueo que rechazaba transferencias
+    - Agregada validación: destino requerido, pertenece al usuario, diferente al origen
+    - Validación de saldo/crédito suficiente en origen
+    - `_apply_transfer_balance()`: lógica bidireccional (origen siempre pierde, destino gana si es cash/debit, pierde si es crédito=pago de deuda)
+    - `create()` y `update()` manejan ambos wallets
+- [x] 6.1.3 Actualizar view: corregir `perform_destroy` para revertir transferencias correctamente.
+  - **Fecha de completado:** 27/05/2026
+  - **Implementación:** `perform_destroy` revierte el efecto en ambos wallets (origen y destino) al eliminar una transferencia.
+- [x] 6.1.4 Crear pantalla de transferencia en frontend (`app/transfer.tsx`).
+  - **Fecha de completado:** 27/05/2026
+  - **Implementación:**
+    - Selector de wallet origen con saldo disponible
+    - Selector de wallet destino (filtra el origen seleccionado)
+    - Indicador visual cuando es pago de tarjeta de crédito
+    - Input de monto con validación
+    - Concepto opcional
+    - Botón contextual: "Pagar Tarjeta" o "Transferir"
+- [x] 6.1.5 Agregar navegación a pantalla de transferencia desde Accounts y Register.
+  - **Fecha de completado:** 27/05/2026
+  - **Implementación:**
+    - Ruta `/transfer` registrada en `_layout.tsx`
+    - Botón "Transferir" en pantalla de Cuentas (header)
+    - Link "Transferir dinero entre cuentas" en pantalla de Registro
+    - TransactionCard actualizado para mostrar transferencias (ícono ↔, color steel, origen→destino)
+    - Tipo `Transaction` actualizado con `destination_wallet` y `destination_wallet_name`
+- [x] 6.1.6 Probar flujo completo: origen → destino, validación de saldo, eliminación.
+  - **Fecha de completado:** 27/05/2026
+  - **Verificación:** Backend health check OK, migración aplicada, API responde.
+
+### 6.2 Categorías Predefinidas (Seed Data)
+- [x] 6.2.1 Crear endpoint `POST /categories/seed_defaults/` en CategoryViewSet.
+  - **Fecha de completado:** 27/05/2026
+  - **Implementación:**
+    - 8 categorías por defecto: Hormiga (#e74c3c), Imprevisto (#f39c12), Fijo (#20394a), Comida (#2ecc71), Transporte (#6196aa), Entretenimiento (#9b59b6), Salud (#1abc9c), Compras (#e67e22)
+    - El endpoint omite nombres que ya existan (sin duplicar)
+    - Retorna `{created, skipped, categories}` con todas las categorías del usuario
+    - Marca `is_default=True` en las creadas por seed
+- [x] 6.2.2 Actualizar onboarding para usar `seedDefaults()` en vez de crear categorías manualmente.
+  - **Fecha de completado:** 27/05/2026
+  - **Implementación:** Reemplazadas 6 llamadas individuales `categoryService.create()` por una sola llamada `categoryService.seedDefaults()`.
+- [x] 6.2.3 Agregar auto-seed en pantalla de Registro cuando el usuario no tiene categorías.
+  - **Fecha de completado:** 27/05/2026
+  - **Implementación:** `loadData()` en register.tsx verifica si `categories.length === 0` y llama a `seedDefaults()` automáticamente.
+
+### 6.3 Comparativo Mes Actual vs Anterior
+- [x] 6.3.1 Crear endpoint `GET /transactions/comparison/` en backend.
+  - **Fecha de completado:** 27/05/2026
+  - **Implementación:**
+    - Agrupa gastos del mes actual y mes anterior por categoría
+    - Calcula delta absoluto y porcentual por categoría
+    - Incluye totales generales con delta
+    - Ordenado por gasto actual descendente
+    - Retorna: `{period_current, period_previous, total_current, total_previous, total_delta, categories[]}`
+- [x] 6.3.2 Agregar tipos TypeScript (`MonthComparison`, `CategoryComparison`) y método `getComparison()`.
+  - **Fecha de completado:** 27/05/2026
+- [x] 6.3.3 Agregar sección visual de comparativo en el Dashboard.
+  - **Fecha de completado:** 27/05/2026
+  - **Implementación:**
+    - Header con totales: Este mes vs Mes anterior + delta %
+    - Barras horizontales por categoría (color sólido = actual, semitransparente = anterior)
+    - Indicador de tendencia ↑↓ con % por categoría
+     - Colores: rojo para aumento, verde para disminución
+
+### 6.4 Corrección de Bugs Críticos (Auditoría)
+- [x] 6.4.1 Bug #1: Validar que pago a TC no exceda la deuda del destino.
+  - **Fecha de completado:** 27/05/2026
+  - **Fix:** Validación agregada en `validate()`: si destino es crédito, `amount <= destination.balance`.
+- [x] 6.4.2 Bug #2: Income a TC debe REDUCIR deuda (antes la aumentaba).
+  - **Fecha de completado:** 27/05/2026
+  - **Fix:** `_apply_balance_effect()` ahora distingue: income a crédito = `balance -= amount` (reduce deuda).
+- [x] 6.4.3 Bug #3: `perform_destroy` de income ahora distingue tipo wallet.
+  - **Fecha de completado:** 27/05/2026
+  - **Fix:** Si el wallet es crédito, al eliminar income se REVIERTE la reducción de deuda (`balance += amount`).
+- [x] 6.4.4 Bug #4: TC sin `credit_limit` ya no permite gastos.
+  - **Fecha de completado:** 27/05/2026
+  - **Fix:** Validación agregada: si es TC y no tiene límite, rechaza con mensaje claro.
+- [x] 6.4.5 Bug #5: `credit_limit` requerido al crear/editar TC.
+  - **Fecha de completado:** 27/05/2026
+  - **Fix:** `WalletSerializer.validate()` exige `credit_limit > 0` para wallets tipo crédito.
+- [x] 6.4.6 Bug #6: `summary` ahora separa income real de reembolsos a TC.
+  - **Fecha de completado:** 27/05/2026
+  - **Fix:** `real_income` excluye ingresos a crédito. Nuevo campo `credit_refunds` y `total_credit_debt`.
+- [x] 6.4.7 Bug #7: `perform_destroy` de transferencia refactorizado (sin duplicar lógica).
+  - **Fecha de completado:** 27/05/2026
+  - **Fix:** Código simplificado pero mantiene consistencia con `_apply_transfer_balance`.
+- [x] 6.4.8 Bug #8: `seedDefaults` ahora muestra loading en register.
+  - **Fecha de completado:** 27/05/2026
+  - **Fix:** Estado `seeding` con `ActivityIndicator` y texto "Creando categorías..." mientras se crean.
+- [x] 6.4.9 Bug #9: `TransactionCard` ahora diferencia Pago TC, Avance TC y Transferencia.
+  - **Fecha de completado:** 27/05/2026
+  - **Fix:** Nuevos props `walletType` y `destinationWalletType`. Colores/íconos distintos por tipo.
+
+## Fase 7: Corrección de Entorno (Expo SDK Upgrade)
+- [x] 7.1 Actualizar Expo SDK 52 → 56 por incompatibilidad con Expo Go en dispositivos móviles.
+  - **Fecha de completado:** 27/05/2026
+  - **Diagnóstico:** El proyecto usaba Expo SDK 52.0.0 (nov 2024), pero Expo Go en celulares solo soporta los últimos 2-3 SDKs. La versión más reciente es 56.0.5.
+  - **Paquetes actualizados:**
+    - `expo`: 52.0.0 → 56.0.5
+    - `expo-router`: 4.0.22 → 56.2.7
+    - `react`: 18.3.1 → 19.2.3
+    - `react-dom`: 18.3.1 → 19.2.3
+    - `react-native`: 0.76.7 → 0.85.3
+    - `react-native-reanimated`: 3.16.7 → 4.3.1
+    - `react-native-gesture-handler`: 2.20.2 → 2.31.2
+    - `react-native-safe-area-context`: 4.12.0 → 5.7.0
+    - `react-native-screens`: 4.4.0 → 4.25.2
+    - `react-native-svg`: 15.8.0 → 15.15.4
+    - `react-native-web`: 0.19.13 → 0.21.2
+    - `nativewind`: 4.1.23 → 4.2.4
+    - `lucide-react-native`: 0.460.0 → 1.16.0
+    - `typescript`: 5.3.3 → 6.0.3
+    - `@expo/metro-runtime`: 4.0.1 → 56.0.13
+    - `expo-constants`: 17.0.8 → 56.0.16
+    - `expo-linking`: 7.0.5 → 56.0.12
+    - `expo-splash-screen`: 0.29.24 → 56.0.10
+    - `expo-status-bar`: 2.0.1 → 56.0.4
+    - `@react-native-async-storage/async-storage`: 1.23.1 → 2.2.0
+    - `@react-native-community/netinfo`: 11.3.1 → 12.0.1
+    - `@types/react`: 18.2.79 → 19.2.15
+    - `react-native-worklets`: añadido (requisito nuevo de reanimated 4.x)
+  - **Migraciones de código:**
+    - 7 archivos: `useFocusEffect` movido de `@react-navigation/native` a `expo-router` (SDK 56 ya no usa react-navigation)
+    - Eliminado `@react-navigation/native` de dependencias
+    - `_layout.tsx`: removido `backgroundColor` de `StatusBar` (deprecado en RN 0.85)
+    - Varios archivos: tipos de amount/balance convertidos a string en creación de registros
+    - `nativewind-env.d.ts`: añadida declaración para imports CSS side-effect
+    - `tsconfig.json`: añadido `ignoreDeprecations: "6.0"`
+  - **Verificación:** `npx tsc --noEmit` sin errores. `npx expo export --platform web` compila 2931 módulos exitosamente.

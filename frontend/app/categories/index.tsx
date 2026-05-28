@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 import { ChevronLeft, X } from 'lucide-react-native';
 import { FormInput, PrimaryButton } from '../../src/components';
 import { categoryService } from '../../src/services/finance';
@@ -51,7 +51,7 @@ export default function CategoriesScreen() {
     <View className="flex-1 bg-bone">
       <ScrollView className="flex-1 p-6">
         <View className="flex-row items-center mb-4">
-          <TouchableOpacity onPress={() => router.replace('/settings')} className="mr-4 flex-row items-center">
+          <TouchableOpacity onPress={() => router.back()} className="mr-4 flex-row items-center">
             <ChevronLeft size={24} strokeWidth={2} color="#030706" />
             <Text className="text-noir text-lg font-semibold ml-1">Volver</Text>
           </TouchableOpacity>

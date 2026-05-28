@@ -31,6 +31,8 @@ export interface Transaction {
   id: number;
   wallet: number;
   wallet_name: string;
+  destination_wallet?: number;
+  destination_wallet_name?: string;
   category?: number;
   category_name?: string;
   amount: string;
@@ -64,4 +66,24 @@ export interface TransactionSummary {
   total_expenses: number;
   balance: number;
   transaction_count: number;
+}
+
+export interface CategoryComparison {
+  category_id: number | null;
+  category_name: string;
+  category_color: string;
+  current_amount: number;
+  previous_amount: number;
+  delta: number;
+  pct_change: number;
+  trend: 'up' | 'down' | 'stable';
+}
+
+export interface MonthComparison {
+  period_current: string;
+  period_previous: string;
+  total_current: number;
+  total_previous: number;
+  total_delta: number;
+  categories: CategoryComparison[];
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
-import { FolderOpen, Target, Settings, LogOut } from 'lucide-react-native';
+import { FolderOpen, Target, Settings, LogOut, Receipt } from 'lucide-react-native';
 import { PrimaryButton } from '../../src/components';
 import { authService } from '../../src/services/auth';
 import { User } from '../../src/types';
@@ -52,9 +52,13 @@ export default function SettingsScreen() {
           <Target {...iconProps} color="#6196aa" />
           <Text className="text-bone text-base ml-3">Metas de Ahorro</Text>
         </Pressable>
-        <Pressable className="p-4 flex-row items-center">
+        <Pressable className="p-4 border-b border-steel/20 flex-row items-center" onPress={() => router.push('/transactions')}>
+          <Receipt {...iconProps} color="#6196aa" />
+          <Text className="text-bone text-base ml-3">Transacciones</Text>
+        </Pressable>
+        <Pressable className="p-4 flex-row items-center opacity-50" onPress={() => {}}>
           <Settings {...iconProps} color="#c9ccc3" />
-          <Text className="text-concrete text-base ml-3">Preferencias</Text>
+          <Text className="text-concrete text-base ml-3">Preferencias (próximamente)</Text>
         </Pressable>
       </View>
 

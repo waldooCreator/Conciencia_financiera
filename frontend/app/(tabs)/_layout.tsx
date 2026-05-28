@@ -31,7 +31,6 @@ export default function TabsLayout() {
           shadowOpacity: 0,
         },
         tabBarShowLabel: false,
-        sceneStyle: { backgroundColor: '#f9f5ed' },
       }}
     >
       <Tabs.Screen name="register" options={{ tabBarIcon: ({ focused }) => <TabIcon Icon={PlusCircle} label="Registro" focused={focused} /> }} />

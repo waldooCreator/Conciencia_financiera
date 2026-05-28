@@ -28,7 +28,7 @@ export default function PrimaryButton({
       disabled={disabled || loading}
       className={`
         w-full py-4 px-6 rounded-2xl items-center justify-center
-        ${isSecondary ? 'bg-steel' : 'bg-noir'}
+        ${isSecondary ? 'bg-steel border border-steel' : 'bg-noir'}
         ${disabled || loading ? 'opacity-50' : 'active:scale-95'}
       `}
       style={[style]}

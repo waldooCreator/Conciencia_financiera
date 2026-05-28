@@ -87,8 +87,8 @@ export default function RegisterScreen() {
         />
 
         {errorMsg ? (
-          <View className="bg-red-50 border border-red-400 rounded-xl p-3 mb-4">
-            <Text className="text-red-600 text-center">{errorMsg}</Text>
+          <View className="bg-red-50 border border-red-300 rounded-2xl p-4 mb-4 flex-row items-start">
+            <Text className="text-red-600 text-sm flex-1 leading-5">{errorMsg}</Text>
           </View>
         ) : null}
 

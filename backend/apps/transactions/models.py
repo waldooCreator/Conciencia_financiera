@@ -28,6 +28,14 @@ class Transaction(models.Model):
         on_delete=models.PROTECT,
         related_name='transactions'
     )
+    destination_wallet = models.ForeignKey(
+        'wallets.Wallet',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='incoming_transfers',
+        help_text='Destination wallet for transfers'
+    )
     category = models.ForeignKey(
         'categories.Category',
         on_delete=models.SET_NULL,
