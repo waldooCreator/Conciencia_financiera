@@ -33,6 +33,12 @@
     "plugins": [
       "expo-router"
     ],
-    "scheme": "finanzas-personales"
+    "scheme": "finanzas-personales",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9d30275c-d883-4500-b845-466c8ed6cc41"
+      }
+    }
   }
 }
