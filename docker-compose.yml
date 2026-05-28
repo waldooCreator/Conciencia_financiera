@@ -45,7 +45,6 @@ services:
     entrypoint: /app/entrypoint.sh
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./backend:/app:cached
       - backend_static:/app/staticfiles
     ports:
       - "${BACKEND_PORT:-3021}:8000"
