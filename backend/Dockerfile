@@ -34,8 +34,11 @@ RUN pip install --upgrade pip && \
 # Copiar el proyecto
 COPY . .
 
-# Corregir line endings (Windows→Linux) + hacer ejecutable
-RUN sed -i 's/\r$//' /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+# Corregir line endings Windows→Linux (CRLF→LF) + hacer ejecutable
+# Usamos python porque está garantizado en esta imagen; sed no siempre lo está en slim
+RUN python -c "f='/app/entrypoint.sh'; d=open(f,'rb').read(); d=d.replace(b'\r\n',b'\n').replace(b'\r',b'\n'); open(f,'wb').write(d)" && \
+    chmod +x /app/entrypoint.sh && \
+    head -1 /app/entrypoint.sh | cat -A
 
 # Puerto de exposición
 EXPOSE 8000
