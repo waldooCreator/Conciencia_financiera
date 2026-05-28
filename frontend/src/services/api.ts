@@ -4,6 +4,10 @@ import Constants from 'expo-constants';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api';
 
+// Debug: muestra la URL que está usando el APK
+console.log('🔗 API_URL usada:', API_URL);
+console.log('📦 Constants.expoConfig.extra:', JSON.stringify(Constants.expoConfig?.extra));
+
 const api = axios.create({
   baseURL: API_URL,
   timeout: 10000,
