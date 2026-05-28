@@ -19,6 +19,7 @@
       "bundleIdentifier": "com.finanzaspersonales.app"
     },
     "android": {
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#f9f5ed"
