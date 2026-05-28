@@ -34,8 +34,8 @@ RUN pip install --upgrade pip && \
 # Copiar el proyecto
 COPY . .
 
-# Hacer ejecutable el entrypoint
-RUN chmod +x /app/entrypoint.sh
+# Corregir line endings (Windows→Linux) + hacer ejecutable
+RUN sed -i 's/\r$//' /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 # Puerto de exposición
 EXPOSE 8000
