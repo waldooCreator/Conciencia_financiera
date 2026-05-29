@@ -1,11 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// En EAS Build, NODE_ENV siempre es "production"
-// En Expo Go (desarrollo), no está definida → usa .env o localhost
-const API_URL = process.env.NODE_ENV === 'production'
-  ? 'http://185.202.223.66/api'
-  : (process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api');
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://185.202.223.66/api';
 
 const api = axios.create({
   baseURL: API_URL,
