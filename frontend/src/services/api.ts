@@ -1,12 +1,11 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
 
-const API_URL = Constants.expoConfig?.extra?.apiUrl || process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api';
-
-// Debug: muestra la URL que está usando el APK
-console.log('🔗 API_URL usada:', API_URL);
-console.log('📦 Constants.expoConfig.extra:', JSON.stringify(Constants.expoConfig?.extra));
+// __DEV__ es true en Expo Go (desarrollo), false en APK (producción)
+// En el APK hardcodeamos la URL del servidor para garantizar que nunca falle
+const API_URL = __DEV__
+  ? (process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api')
+  : 'http://185.202.223.66:3020/api';
 
 const api = axios.create({
   baseURL: API_URL,
