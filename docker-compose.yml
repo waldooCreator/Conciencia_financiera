@@ -82,6 +82,7 @@ services:
     container_name: finanzas_frontend
     restart: unless-stopped
     ports:
+      - "80:80"
       - "${FRONTEND_PORT:-3020}:80"
     depends_on:
       backend:

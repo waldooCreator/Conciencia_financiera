@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // En el APK hardcodeamos la URL del servidor para garantizar que nunca falle
 const API_URL = __DEV__
   ? (process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api')
-  : 'http://185.202.223.66:3020/api';
+  : 'http://185.202.223.66/api';
 
 const api = axios.create({
   baseURL: API_URL,
