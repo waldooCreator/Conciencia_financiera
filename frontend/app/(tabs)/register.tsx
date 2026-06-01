@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { walletService, categoryService, transactionService } from '../../src/services/finance';
-import { syncService } from '../../src/services/sync';
+import { getServiceErrorMessage } from '../../src/utils/errors';
 import { useToast } from '../../src/context/ToastContext';
 import { Wallet, Category } from '../../src/types';
 
@@ -89,9 +89,8 @@ export default function RegisterScreen() {
         'success'
       );
       setTimeout(() => amountRef.current?.focus(), 300);
-    } catch (e: any) {
-      const msg = e.response?.data?.amount?.[0] || e.response?.data?.detail || 'Error al registrar';
-      showToast(msg, 'error');
+    } catch (e: unknown) {
+      showToast(getServiceErrorMessage(e, 'Error al registrar'), 'error');
     } finally { setLoading(false); }
   };
 

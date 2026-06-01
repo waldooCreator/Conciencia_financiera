@@ -5,6 +5,7 @@ import { useFocusEffect } from 'expo-router';
 import { ChevronLeft, X } from 'lucide-react-native';
 import { FormInput, PrimaryButton } from '../../src/components';
 import { goalService } from '../../src/services/finance';
+import { getServiceErrorMessage } from '../../src/utils/errors';
 import { SavingsGoal } from '../../src/types';
 
 export default function GoalsScreen() {
@@ -50,7 +51,7 @@ export default function GoalsScreen() {
     if (!fundsAmount || !editingGoal) { setErrorMsg('Ingresa un monto'); return; }
     setLoading(true); setErrorMsg('');
     try { await goalService.withdrawFunds(editingGoal.id, parseFloat(fundsAmount)); setModalMode(null); loadData(); }
-    catch (e: any) { setErrorMsg(e?.response?.data?.error || 'Error'); }
+    catch (e: unknown) { setErrorMsg(getServiceErrorMessage(e, 'Error')); }
     finally { setLoading(false); }
   };
 

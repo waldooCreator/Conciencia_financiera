@@ -1,94 +1,18 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { useEffect } from 'react';
+import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
-import { FormInput, PrimaryButton } from '../../src/components';
-import { authService } from '../../src/services/auth';
 
+/** Legacy route — app is local-only; redirect to main screen. */
 export default function LoginScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
 
-  const handleLogin = async () => {
-    setErrorMsg('');
-    if (!email || !password) {
-      setErrorMsg('Completa todos los campos');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await authService.login(email, password);
-      router.replace('/dashboard');
-    } catch (error: any) {
-      const detail = error.response?.data?.detail;
-      setErrorMsg(detail || 'Error de conexión. ¿Está corriendo el backend?');
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    router.replace('/(tabs)/register');
+  }, []);
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-bone"
-    >
-      <ScrollView contentContainerClassName="flex-grow p-6 justify-center">
-        {/* Logo */}
-        <View className="items-center mb-10">
-          <View className="w-20 h-20 bg-denim rounded-3xl mb-4 items-center justify-center">
-            <Text className="text-4xl text-bone font-bold">$</Text>
-          </View>
-          <Text className="text-3xl font-bold text-noir mb-2">
-            Bienvenido
-          </Text>
-          <Text className="text-lg text-concrete text-center">
-            Gestiona tus finanzas sin fricción
-          </Text>
-        </View>
-
-        <FormInput
-          label="Correo electrónico"
-          placeholder="tu@email.com"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-
-        <FormInput
-          label="Contraseña"
-          placeholder="••••••••"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-
-        {errorMsg ? (
-          <View className="bg-red-50 border border-red-300 rounded-2xl p-4 mb-4">
-            <Text className="text-red-600 text-sm leading-5">{errorMsg}</Text>
-          </View>
-        ) : null}
-
-        <View className="mt-6">
-          <PrimaryButton
-            title="Iniciar Sesión"
-            onPress={handleLogin}
-            loading={loading}
-          />
-        </View>
-
-        <View className="mt-6 items-center">
-          <Text className="text-concrete mb-2">¿No tienes cuenta?</Text>
-          <TouchableOpacity onPress={() => router.push('/auth/register')}>
-            <Text className="text-steel font-semibold text-base">
-              Crear una cuenta
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    <View className="flex-1 bg-bone items-center justify-center">
+      <Text className="text-concrete">Redirigiendo...</Text>
+    </View>
   );
 }

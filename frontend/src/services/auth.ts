@@ -1,5 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from './api';
+import { appStateService, LocalProfile } from './appState';
 
 export interface User {
   id: number;
@@ -9,49 +8,44 @@ export interface User {
   date_joined: string;
 }
 
-export interface AuthResponse {
-  access: string;
-  refresh: string;
-  user: User;
-  message: string;
+function profileToUser(profile: LocalProfile | null): User | null {
+  if (!profile) return null;
+  return {
+    id: 1,
+    email: profile.email || 'local@finanzas.app',
+    first_name: profile.name,
+    last_name: '',
+    date_joined: new Date().toISOString(),
+  };
 }
 
 export const authService = {
-  async login(email: string, password: string): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>('/token/', { email, password });
-    const { access, refresh } = response.data;
-    
-    await AsyncStorage.setItem('accessToken', access);
-    await AsyncStorage.setItem('refreshToken', refresh);
-    
-    return response.data;
-  },
-
-  async register(email: string, password: string, password_confirm: string, first_name?: string, last_name?: string): Promise<any> {
-    const payload: any = { email, password, password_confirm };
-    if (first_name) payload.first_name = first_name;
-    if (last_name) payload.last_name = last_name;
-    await api.post('/users/register/', payload);
-    // Auto-login after registration to get tokens
-    return this.login(email, password);
-  },
-
-  async logout(): Promise<void> {
-    await AsyncStorage.removeItem('accessToken');
-    await AsyncStorage.removeItem('refreshToken');
-  },
-
+  /** Local app: always "authenticated" once onboarding is done. */
   async isAuthenticated(): Promise<boolean> {
-    const token = await AsyncStorage.getItem('accessToken');
-    return !!token;
+    return appStateService.isOnboardingComplete();
   },
 
   async getUser(): Promise<User | null> {
-    try {
-      const response = await api.get<User>('/users/profile/');
-      return response.data;
-    } catch {
-      return null;
+    const profile = await appStateService.getProfile();
+    if (profile) return profileToUser(profile);
+    const onboarded = await appStateService.isOnboardingComplete();
+    if (onboarded) {
+      return {
+        id: 1,
+        email: 'local@finanzas.app',
+        first_name: 'Usuario',
+        last_name: '',
+        date_joined: new Date().toISOString(),
+      };
     }
+    return null;
+  },
+
+  async setProfile(name: string, email?: string): Promise<void> {
+    await appStateService.setProfile({ name, email });
+  },
+
+  async logout(): Promise<void> {
+    await appStateService.resetApp();
   },
 };

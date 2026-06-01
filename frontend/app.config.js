@@ -4,6 +4,7 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://185.202.223.66:3020/ap
 
 module.exports = ({ config }) => ({
   ...config,
+  plugins: [...(config.plugins || []), 'expo-sqlite'],
   extra: {
     ...config.extra,
     apiUrl,

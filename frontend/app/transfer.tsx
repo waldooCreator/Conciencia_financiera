@@ -8,6 +8,7 @@ import { useFocusEffect } from 'expo-router';
 import { ArrowLeftRight, ChevronDown, Check, Banknote, CreditCard, Landmark, AlertTriangle } from 'lucide-react-native';
 import { walletService, transactionService } from '../src/services/finance';
 import { useToast } from '../src/context/ToastContext';
+import { getServiceErrorMessage } from '../src/utils/errors';
 import { Wallet } from '../src/types';
 
 const WALLET_ICONS: Record<string, React.ComponentType<any>> = {
@@ -67,10 +68,8 @@ export default function TransferScreen() {
       });
       showToast('Transferencia realizada', 'success');
       router.back();
-    } catch (error: any) {
-      const data = error.response?.data;
-      const msg = data?.amount || data?.destination_wallet || data?.detail || 'Error al transferir';
-      setErrorMsg(typeof msg === 'string' ? msg : JSON.stringify(msg));
+    } catch (error: unknown) {
+      setErrorMsg(getServiceErrorMessage(error, 'Error al transferir'));
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity, Animated, Dimensions, KeyboardAvoidingVie
 import { useRouter } from 'expo-router';
 import { FormInput, PrimaryButton } from '../../src/components';
 import { walletService, goalService, categoryService } from '../../src/services/finance';
+import { appStateService } from '../../src/services/appState';
+import { authService } from '../../src/services/auth';
 
 const { width } = Dimensions.get('window');
 
@@ -67,7 +69,9 @@ export default function OnboardingScreen() {
       const gv = goalAmount || '0';
       if (parseFloat(gv) > 0) await goalService.create({ name: 'Mi Meta de Ahorro', target_amount: gv });
 
-      router.replace('/register');
+      await authService.setProfile('Usuario');
+      await appStateService.setOnboardingComplete();
+      router.replace('/(tabs)/register');
     } catch { setErrorMsg('Error al configurar. Intenta de nuevo.'); }
     finally { setLoading(false); }
   };
