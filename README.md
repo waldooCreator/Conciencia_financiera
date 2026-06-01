@@ -298,8 +298,8 @@ Pantallas principales de la aplicación en funcionamiento:
 | Pantalla | Descripción | Captura |
 |----------|-------------|---------|
 | **Registro de gastos** | Formulario de fricción cero para ingresar gastos e ingresos al instante | ![Registro](frontend/public/im-1.jpg) |
-| **Cuentas / Medios de pago** | Listado de efectivo, débito y crédito con opción de agregar nuevas cuentas | ![Cuentas](frontend/public/im-2.jpg) |
-| **Dashboard** | Gráfico de gastos por categoría y resumen financiero del mes | ![Dashboard](frontend/public/im-3.jpg) |
+| **Cuentas / Medios de pago** | Listado de efectivo, débito y crédito con opción de agregar nuevas cuentas | ![Cuentas](frontend/public/im-3.jpg) |
+| **Dashboard** | Gráfico de gastos por categoría y resumen financiero del mes | ![Dashboard](frontend/public/im-2.jpg) |
 | **Transferencias / Pago TC** | Pago de tarjetas de crédito y reposición de cupo disponible | ![Transferencia](frontend/public/im-4.jpg) |
 
 **Otras pantallas implementadas** (sin captura dedicada en este repositorio):
