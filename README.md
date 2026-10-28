@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/readme/banner.svg" width="100%" alt="Conciencia Financiera: pixel-art header with a gold coin over a night sky"></p>
+<p align="center"><img src="docs/readme/banner.svg" width="100%" alt="Conciencia Financiera: pixel-art header with the project name over a night sky"></p>
 
 <p align="center"><b>English</b> · <a href="README.es.md">Español</a></p>
 
@@ -20,10 +20,10 @@
 </p>
 
 <p align="center">
-  <img src="frontend/public/im-1.jpg" width="23%" alt="Quick expense entry screen">
-  <img src="frontend/public/im-3.jpg" width="23%" alt="Payment methods: cash, debit and credit cards with available credit">
-  <img src="frontend/public/im-4.jpg" width="23%" alt="Dashboard: spending by category and month-over-month comparison">
-  <img src="frontend/public/im-2.jpg" width="23%" alt="Transfer screen paying off a credit card">
+  <img src="docs/readme/screen-entry.jpg" width="23%" alt="Quick expense entry screen">
+  <img src="docs/readme/screen-wallets.jpg" width="23%" alt="Payment methods: cash, debit and credit cards with available credit">
+  <img src="docs/readme/screen-dashboard.jpg" width="23%" alt="Dashboard: spending by category and month-over-month comparison">
+  <img src="docs/readme/screen-transfer.jpg" width="23%" alt="Transfer screen paying off a credit card">
 </p>
 <p align="center"><sub>Quick entry · Payment methods · Spending dashboard · Credit card payment</sub></p>
 
@@ -34,9 +34,9 @@
 | Edition | Runs on | Stack | Best for |
 | --- | --- | --- | --- |
 | **Android app (local-first)** | The phone itself | Expo + React Native + TypeScript + **SQLite** | Offline use, data stays 100% on the device |
-| **Server edition** | Any Linux host with Docker | **Django REST Framework** + PostgreSQL + nginx, PWA frontend | Web access, centralized data, JWT accounts |
+| **Server edition** | Any Linux host with Docker | **Django REST Framework** API (JWT, PostgreSQL) + the Expo app exported as a web build, served by nginx | REST API + PostgreSQL backend, browser access |
 
-The current app code is local-first: every screen talks to a TypeScript service layer that stores data in SQLite on the device, so the APK works with no backend and no internet. The Django REST API models the same domain (wallets, categories, transactions, savings goals) for the server edition, served behind nginx with JWT authentication.
+The current app code is local-first: every screen talks to a TypeScript service layer that stores data in SQLite on the device, so the APK works with no backend and no internet. The server edition is a Docker Compose stack: nginx serves that same app as a web build (still local-first, running in the browser) and proxies `/api/` to a Django REST API with JWT authentication and PostgreSQL. The API models the same domain (wallets, categories, transactions, savings goals) and runs on its own, but it is not yet wired into the app's screens.
 
 ## Features
 
@@ -44,20 +44,20 @@ The current app code is local-first: every screen talks to a TypeScript service 
 - **All your payment methods.** Cash, debit accounts and credit cards, each with its own balance; credit cards track limit, debt and available credit.
 - **Realistic balance rules.** Expenses lower cash and debit balances and raise credit card debt; deleting a transaction reverses its effect.
 - **Transfers and card payments.** Move money between accounts or pay off a credit card and watch the available credit come back.
-- **Installments.** Credit card purchases can be split into installments with the per-installment amount and remaining count computed for you.
+- **Installment-ready data model.** Transactions store installments and compute the per-installment amount and remaining count; choosing installments from the UI is not built yet.
 - **Spending dashboard.** Income vs. expenses, spending by category and a month-over-month comparison per category.
 - **Savings goals.** Create goals, add or withdraw funds and follow progress bars right on the dashboard.
 - **Guided onboarding.** A question-by-question first run that sets up your name, balance, debit accounts and credit cards.
-- **Default categories.** A ready-made set (fixed costs, food, transport, health, "ant" expenses, unexpected) that you can edit or extend.
+- **Default categories.** A ready-made set (fixed costs, food, transport, health, entertainment, shopping, "ant" expenses, unexpected) that you can edit or extend.
 
 ## Tech stack
 
 | Layer | Android app (local-first) | Server edition |
 | --- | --- | --- |
-| UI | Expo Router, NativeWind (Tailwind), Reanimated, lucide icons | Same Expo app exported as a PWA |
+| UI | Expo Router, NativeWind (Tailwind), Reanimated, lucide icons | Same Expo app exported as a web build |
 | Logic | TypeScript services + business rules (`src/db/businessLogic.ts`) | Django REST Framework ViewSets and serializers |
 | Data | `expo-sqlite` on the device | PostgreSQL 15 |
-| Auth | Local profile, no remote login | SimpleJWT (access + refresh tokens) |
+| Auth | Local profile, no remote login | SimpleJWT in the API (access + refresh tokens), not yet used by the app |
 | Delivery | EAS Build (APK) | Docker Compose, nginx reverse proxy |
 
 ## Architecture
@@ -71,9 +71,10 @@ flowchart LR
   end
 
   subgraph Server["Server edition (Docker Compose)"]
-    PWA["PWA<br/>Expo web build"] --> NGX["nginx<br/>static files + /api proxy"]
-    NGX --> API["Django REST API<br/>JWT auth"]
+    NGX["nginx"] -->|"/"| WEB["Expo web build<br/>same local-first app"]
+    NGX -->|"/api/"| API["Django REST API<br/>JWT auth"]
     API --> PG[("PostgreSQL 15")]
+    WEB -.->|"available, not yet consumed by the app"| API
   end
 ```
 
@@ -81,7 +82,7 @@ flowchart LR
 
 ### Android app (local development)
 
-Requirements: Node.js 18+, and an Android device with Expo Go or an emulator.
+Requirements: Node.js 20.19+ (LTS), and an Android device with Expo Go or an emulator.
 
 ```bash
 git clone https://github.com/waldooCreator/Conciencia_financiera.git
@@ -107,7 +108,9 @@ cp .env.example .env   # fill in your own values
 make up-build          # docker-compose up -d --build
 ```
 
-The backend waits for PostgreSQL and applies migrations on startup. Then open `http://localhost:3020` for the PWA; the API answers under `/api/` (for example `/api/health/`). Run `make help` to list every shortcut (logs, shell, tests, superuser, clean).
+The stack starts PostgreSQL, the Django API, the nginx frontend and a Redis container. The backend waits for PostgreSQL and applies migrations on startup. Then open `http://localhost:3020` for the web build; the API answers under `/api/` (for example `/api/health/`). Run `make help` to list every shortcut (logs, shell, tests, superuser, clean).
+
+> The frontend container binds ports **80** and **3020**; free port 80 or edit `docker-compose.yml` before running `make up-build`.
 
 For a bare-metal Linux deployment with Gunicorn, nginx and systemd, see [`docs/deploy-linux.md`](docs/deploy-linux.md).
 
@@ -144,7 +147,7 @@ Conciencia_financiera/
 │   ├── apps/              # users, wallets, categories, transactions, goals, health
 │   └── config/            # Settings and URL routing
 ├── infrastructure/db/     # PostgreSQL init script
-├── docs/                  # Linux deployment guide
+├── docs/                  # Linux deployment guide and README assets
 ├── .specs/ .design/ .tasks/   # Spec-Driven Development: specs, design, task plan
 ├── docker-compose.yml
 └── Makefile
